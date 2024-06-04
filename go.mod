@@ -72,5 +72,8 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+require github.com/rs/xid v1.5.0
+
 // 使用 replace 语句强制所有引用使用相同版本的 `codec`
 replace github.com/ugorji/go/codec => github.com/ugorji/go/codec v1.2.12

@@ -1,6 +1,8 @@
 package api
 
-import "alarm_collector/api/system"
+import (
+	"alarm_collector/api/system"
+)
 
 type ApiGroup struct {
 	SystemApiGroup system.ApiGroup

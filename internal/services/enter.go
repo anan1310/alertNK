@@ -1,15 +1,17 @@
 package services
 
 import (
-	"alarm_collector/internal/services/system"
 	"alarm_collector/pkg/ctx"
 )
 
 var (
-	UserService system.InterSysUserService
+	UserService      InterSysUserService
+	AlertService     InterAlertService //告警规则推送
+	RuleGroupService InterRuleGroupService
 )
 
 func NewServices(ctx *ctx.Context) {
-	UserService = system.NewInterUserService(ctx)
-
+	UserService = newInterUserService(ctx)
+	AlertService = newInterAlertService(ctx)
+	RuleGroupService = newInterRuleGroupService(ctx)
 }

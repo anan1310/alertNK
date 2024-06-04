@@ -72,6 +72,7 @@ type Updates struct {
 	Table   interface{}
 	Where   map[string]interface{}
 	Updates interface{}
+	Omit    string
 }
 
 func (g GormDBCli) Updates(value Updates) error {
@@ -81,7 +82,7 @@ func (g GormDBCli) Updates(value Updates) error {
 	for column, val := range value.Where {
 		tx = tx.Where(column, val)
 	}
-	err := tx.Updates(value.Updates).Error
+	err := tx.Omit(value.Omit).Updates(value.Updates).Error
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("数据更新失败 -> %s", err)

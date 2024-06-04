@@ -1,4 +1,4 @@
-package system
+package services
 
 import (
 	"alarm_collector/pkg/ctx"
@@ -12,7 +12,7 @@ type InterSysUserService interface {
 	List() (interface{}, interface{})
 }
 
-func NewInterUserService(ctx *ctx.Context) InterSysUserService {
+func newInterUserService(ctx *ctx.Context) InterSysUserService {
 	return &sysUserService{
 		ctx: ctx,
 	}

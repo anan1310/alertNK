@@ -25,7 +25,7 @@ func ReturnJsonFromString(Context *gin.Context, httpCode int, jsonStr string) {
 	Context.String(httpCode, jsonStr)
 }
 
-func returnJsonTotal(Context *gin.Context, httpCode int, dataCode int, total int, msg string, data interface{}) {
+func returnJsonTotal(Context *gin.Context, httpCode int, dataCode int, total int64, msg string, data interface{}) {
 
 	//Context.Header("key2020","value2020")  	//可以根据实际情况在头部添加额外的其他信息
 	Context.JSON(httpCode, gin.H{
@@ -37,12 +37,7 @@ func returnJsonTotal(Context *gin.Context, httpCode int, dataCode int, total int
 }
 
 // SuccessTotal 返回带有统计的数据
-func SuccessTotal(c *gin.Context, msg string, total int, data interface{}) {
-	returnJsonTotal(c, http.StatusOK, 0, total, msg, data)
-}
-
-// SuccessChangeTotal 返回可变参
-func SuccessChangeTotal(c *gin.Context, msg string, total int, data ...interface{}) {
+func SuccessTotal(c *gin.Context, msg string, total int64, data interface{}) {
 	returnJsonTotal(c, http.StatusOK, 0, total, msg, data)
 }
 
@@ -64,7 +59,7 @@ func ErrPrintln(err error) {
 	}
 }
 
-func HandleResponse(ctx *gin.Context, fu func() (interface{}, interface{})) {
+func Service(ctx *gin.Context, fu func() (interface{}, interface{})) {
 	data, err := fu()
 	if err != nil {
 		Fail(ctx, err.(error).Error(), "failed")
@@ -72,4 +67,32 @@ func HandleResponse(ctx *gin.Context, fu func() (interface{}, interface{})) {
 		return
 	}
 	Success(ctx, "success", data)
+}
+
+func ServiceTotal(ctx *gin.Context, fu func() (interface{}, interface{}, interface{})) {
+	data, total, err := fu()
+	if err != nil {
+		Fail(ctx, err.(error).Error(), "failed")
+		ctx.Abort()
+		return
+	}
+	SuccessTotal(ctx, "success", total.(int64), data)
+}
+
+func BindJson(ctx *gin.Context, req interface{}) {
+	err := ctx.ShouldBindJSON(&req)
+	if err != nil {
+		Fail(ctx, err.Error(), "failed")
+		ctx.Abort()
+		return
+	}
+}
+
+func BindQuery(ctx *gin.Context, req interface{}) {
+	err := ctx.ShouldBindQuery(req)
+	if err != nil {
+		Fail(ctx, err.Error(), "failed")
+		ctx.Abort()
+		return
+	}
 }

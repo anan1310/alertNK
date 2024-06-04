@@ -1,5 +1,5 @@
 server:
-  httpPort: 9001
+  httpPort: 9090
   runMode: debug
   readTimeout: 3600
   writeTimeout: 3600
@@ -14,7 +14,7 @@ server:
 mysql:
   driverName: mysql
   host: 121.36.93.234:30080
-  database: watchalert
+  database: ccloud_test
   username: root
   password: MySQL%5.7
   maxIdleConns: 10

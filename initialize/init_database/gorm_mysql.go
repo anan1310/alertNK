@@ -2,9 +2,11 @@ package init_database
 
 import (
 	"alarm_collector/global"
+	"alarm_collector/internal/models"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"os"
 )
@@ -26,9 +28,25 @@ func GormMysql() *gorm.DB {
 		//如果mysql连接失败，直接退出程序
 		os.Exit(1)
 	}
-
+	// 检查表结构是否变化，变化则进行迁移
+	err = DB.AutoMigrate(
+		&models.AlertRule{},
+		&models.RuleGroups{},
+	)
+	if err != nil {
+		global.Logger.Sugar().Error(err.Error())
+		return nil
+	}
+	//检查是否开启调试模式
+	if global.Config.Server.RunMode == "debug" {
+		DB.Debug()
+	} else {
+		DB.Logger = logger.Default.LogMode(logger.Silent)
+	}
+	// 设置链接池的相关信息
 	sqlDB, _ := DB.DB()
 	sqlDB.SetMaxIdleConns(m.MaxIdleConns)
 	sqlDB.SetMaxOpenConns(m.MaxOpenConns)
+
 	return DB
 }
