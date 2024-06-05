@@ -12,7 +12,7 @@ type (
 		entryRepo
 	}
 
-	InterRuleGroupRepo interface {
+	interRuleGroupRepo interface {
 		List(req models.RuleGroupQuery) ([]models.RuleGroups, int64, error)
 		Create(req models.RuleGroups) error
 		Update(req models.RuleGroups) error
@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func newRuleGroupInterface(db *gorm.DB, g InterGormDBCli) InterRuleGroupRepo {
+func newRuleGroupInterface(db *gorm.DB, g interGormDBCli) interRuleGroupRepo {
 	return &RuleGroupRepo{
 		entryRepo{
 			g:  g,

@@ -12,12 +12,12 @@ type (
 		ctx *ctx.Context
 	}
 
-	InterAlertService interface {
+	interAlertService interface {
 		RePushRule(ctx *ctx.Context, rule chan *models.AlertRule)
 	}
 )
 
-func newInterAlertService(ctx *ctx.Context) InterAlertService {
+func newInterAlertService(ctx *ctx.Context) interAlertService {
 	return &alertService{
 		ctx: ctx,
 	}

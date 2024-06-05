@@ -8,11 +8,11 @@ type sysUserService struct {
 	ctx *ctx.Context
 }
 
-type InterSysUserService interface {
+type interSysUserService interface {
 	List() (interface{}, interface{})
 }
 
-func newInterUserService(ctx *ctx.Context) InterSysUserService {
+func newInterUserService(ctx *ctx.Context) interSysUserService {
 	return &sysUserService{
 		ctx: ctx,
 	}

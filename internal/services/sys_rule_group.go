@@ -9,13 +9,13 @@ type ruleGroupService struct {
 	ctx *ctx.Context
 }
 
-func newInterRuleGroupService(ctx *ctx.Context) InterRuleGroupService {
+func newInterRuleGroupService(ctx *ctx.Context) interRuleGroupService {
 	return &ruleGroupService{
 		ctx: ctx,
 	}
 }
 
-type InterRuleGroupService interface {
+type interRuleGroupService interface {
 	Create(req interface{}) (interface{}, interface{})
 	Update(req interface{}) (interface{}, interface{})
 	List(req interface{}) (interface{}, interface{}, interface{})

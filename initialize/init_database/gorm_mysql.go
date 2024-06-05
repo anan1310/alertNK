@@ -32,6 +32,8 @@ func GormMysql() *gorm.DB {
 	err = DB.AutoMigrate(
 		&models.AlertRule{},
 		&models.RuleGroups{},
+		&models.DutyManagement{},
+		&models.DutySchedule{},
 	)
 	if err != nil {
 		global.Logger.Sugar().Error(err.Error())

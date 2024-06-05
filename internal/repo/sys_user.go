@@ -9,12 +9,12 @@ type (
 	UserRepo struct {
 		entryRepo
 	}
-	InterUserRepo interface {
+	interUserRepo interface {
 		List() ([]system.SysUser, error)
 	}
 )
 
-func newUserInterface(db *gorm.DB, g InterGormDBCli) InterUserRepo {
+func newUserInterface(db *gorm.DB, g interGormDBCli) interUserRepo {
 	return &UserRepo{
 		entryRepo{
 			g:  g,

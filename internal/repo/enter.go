@@ -7,14 +7,16 @@ import (
 
 type (
 	entryRepo struct {
-		g  InterGormDBCli
+		g  interGormDBCli
 		db *gorm.DB
 	}
 
 	InterEntryRepo interface {
 		DB() *gorm.DB
-		SysUser() InterUserRepo
-		RuleGroup() InterRuleGroupRepo //告警组
+		SysUser() interUserRepo
+		RuleGroup() interRuleGroupRepo //告警组
+		DutyManager() interDutyManagerRepo
+		DutyCalendar() interDutyCalendar
 	}
 )
 
@@ -27,6 +29,8 @@ func NewMySQLRepoEntry() InterEntryRepo {
 	}
 }
 
-func (e *entryRepo) DB() *gorm.DB                  { return e.db }
-func (e *entryRepo) SysUser() InterUserRepo        { return newUserInterface(e.db, e.g) }
-func (e *entryRepo) RuleGroup() InterRuleGroupRepo { return newRuleGroupInterface(e.db, e.g) }
+func (e *entryRepo) DB() *gorm.DB                      { return e.db }
+func (e *entryRepo) SysUser() interUserRepo            { return newUserInterface(e.db, e.g) }
+func (e *entryRepo) RuleGroup() interRuleGroupRepo     { return newRuleGroupInterface(e.db, e.g) }
+func (e *entryRepo) DutyManager() interDutyManagerRepo { return newDutyManagerInterface(e.db, e.g) }
+func (e *entryRepo) DutyCalendar() interDutyCalendar   { return newDutyCalendarInterface(e.db, e.g) }
