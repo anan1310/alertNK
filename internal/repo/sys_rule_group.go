@@ -38,7 +38,7 @@ func (r RuleGroupRepo) List(req models.RuleGroupQuery) ([]models.RuleGroups, int
 	limit := req.PageSize
 	offset := req.PageSize * (req.Page - 1)
 
-	db.Model(&models.RuleGroups{}).Where("tenant_id = ?", req.TenantId)
+	db.Where("tenant_id = ?", req.TenantId)
 	//查询总条数
 	db.Count(&total)
 

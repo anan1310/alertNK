@@ -19,7 +19,7 @@ func (DutyCalendarApi) Create(ctx *gin.Context) {
 }
 
 func (DutyCalendarApi) Update(ctx *gin.Context) {
-	r := new(models.DutyScheduleCreate)
+	r := new(models.DutySchedule)
 	response.BindJson(ctx, r)
 
 	response.Service(ctx, func() (interface{}, interface{}) {

@@ -17,6 +17,8 @@ type (
 		RuleGroup() interRuleGroupRepo //告警组
 		DutyManager() interDutyManagerRepo
 		DutyCalendar() interDutyCalendar
+		Notice() interNoticeRepo
+		Silence() interSilenceRepo //告警静默
 	}
 )
 
@@ -34,3 +36,5 @@ func (e *entryRepo) SysUser() interUserRepo            { return newUserInterface
 func (e *entryRepo) RuleGroup() interRuleGroupRepo     { return newRuleGroupInterface(e.db, e.g) }
 func (e *entryRepo) DutyManager() interDutyManagerRepo { return newDutyManagerInterface(e.db, e.g) }
 func (e *entryRepo) DutyCalendar() interDutyCalendar   { return newDutyCalendarInterface(e.db, e.g) }
+func (e *entryRepo) Notice() interNoticeRepo           { return newNoticeInterface(e.db, e.g) }
+func (e *entryRepo) Silence() interSilenceRepo         { return newSilenceInterface(e.db, e.g) }

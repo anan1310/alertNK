@@ -68,7 +68,7 @@ func (dc DutyCalendarRepo) List(r models.DutyScheduleQuery) ([]models.DutySchedu
 	db := dc.db.Model(&models.DutySchedule{})
 
 	if r.Time != "" {
-		db.Where("tenant_id = ? AND duty_id = ? AND time = ?", r.TenantId, r.DutyId, r.Time).Find(&dutyScheduleList)
+		db.Where("tenant_id = ? AND duty_id = ? AND time Like ?", r.TenantId, r.DutyId, r.Time+"%").Find(&dutyScheduleList)
 		return dutyScheduleList, nil
 	}
 

@@ -1,5 +1,7 @@
 package models
 
+import "alarm_collector/pkg/utils/common"
+
 const SilenceCachePrefix = "mute-"
 
 type AlertSilences struct {
@@ -24,4 +26,5 @@ type AlertSilenceQuery struct {
 	Datasource     string `json:"datasource" form:"datasource"`
 	DatasourceType string `json:"datasourceType" form:"datasourceType"`
 	Comment        string `json:"comment" form:"comment"`
+	common.PageInfo
 }

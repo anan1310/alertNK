@@ -1,14 +1,11 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
+import "alarm_collector/pkg/utils/common"
 
 type AlertNotice struct {
 	TenantId        string `json:"tenantId"`
-	Uuid            string `json:"uuid"`
+	ID              string `json:"id"`
 	Name            string `json:"name"`
-	Env             string `json:"env"`
 	DutyId          string `json:"dutyId"`
 	NoticeType      string `json:"noticeType"`
 	EnableCard      string `json:"enableCard"`
@@ -18,11 +15,14 @@ type AlertNotice struct {
 	TemplateRecover string `json:"templateRecover"`
 }
 
-type AlertRecord struct {
-	gorm.Model
-	AlertName   string `json:"alertName"`
-	Description string `json:"description"`
-	Metric      string `json:"metric"`
-	Severity    string `json:"severity"`
-	Status      string `json:"status"`
+func (AlertNotice) TableName() string {
+	return "sys_alert_notice"
+}
+
+type NoticeQuery struct {
+	TenantId string `json:"tenantId" form:"tenantId"`
+	ID       string `json:"id" form:"id"`
+	Name     string `json:"name" form:"name"`
+	Query    string `json:"query" form:"query"`
+	common.PageInfo
 }

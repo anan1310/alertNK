@@ -5,4 +5,6 @@ type RouterGroup struct {
 	RuleGroupRouter
 	DutyManagerRouter
 	DutyCalendarRouter
+	NoticeRouter
+	SilencesRouter
 }

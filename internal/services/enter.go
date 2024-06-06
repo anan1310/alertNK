@@ -10,6 +10,8 @@ var (
 	RuleGroupService    interRuleGroupService
 	DutyManagerService  interDutyManagerService
 	DutyCalendarService interDutyCalendarService
+	NoticeService       interNoticeService
+	SilenceService      interSilenceService
 )
 
 func NewServices(ctx *ctx.Context) {
@@ -18,4 +20,6 @@ func NewServices(ctx *ctx.Context) {
 	RuleGroupService = newInterRuleGroupService(ctx)
 	DutyManagerService = newInterDutyMangerService(ctx)
 	DutyCalendarService = newInterDutyCalendarService(ctx)
+	NoticeService = newInterAlertNoticeService(ctx)
+	SilenceService = newInterSilenceService(ctx)
 }

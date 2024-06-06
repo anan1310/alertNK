@@ -5,4 +5,6 @@ type ApiGroup struct {
 	RuleGroupApi
 	DutyManagerApi
 	DutyCalendarApi
+	NoticeApi
+	SilencesApi
 }
