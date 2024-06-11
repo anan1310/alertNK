@@ -7,4 +7,5 @@ type ApiGroup struct {
 	DutyCalendarApi
 	NoticeApi
 	SilencesApi
+	RuleApi
 }

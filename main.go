@@ -9,4 +9,5 @@ func main() {
 	initialize.InitBasic()
 	//启动服务
 	initialize.RunServer()
+
 }

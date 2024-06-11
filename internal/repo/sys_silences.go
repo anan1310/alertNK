@@ -19,7 +19,7 @@ type (
 	}
 )
 
-func newSilenceInterface(db *gorm.DB, g interGormDBCli) interSilenceRepo {
+func newSilenceInterface(db *gorm.DB, g InterGormDBCli) interSilenceRepo {
 	return &SilenceRepo{
 		entryRepo{
 			g:  g,
@@ -77,7 +77,7 @@ func (sr SilenceRepo) Update(r models.AlertSilences) error {
 
 func (sr SilenceRepo) Delete(r models.AlertSilenceQuery) error {
 	var silence models.AlertSilences
-	db := sr.db.Where("tenant_id = ? AND id = ?", r.TenantId, r.Id)
+	db := sr.db.Where("tenant_id = ? AND id = ?", r.TenantId, r.ID)
 	err := db.Find(&silence).Error
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (sr SilenceRepo) Delete(r models.AlertSilenceQuery) error {
 		Table: models.AlertSilences{},
 		Where: map[string]interface{}{
 			"tenant_id = ?": r.TenantId,
-			"id = ?":        r.Id,
+			"id = ?":        r.ID,
 		},
 	}
 	err = sr.g.Delete(del)

@@ -35,6 +35,7 @@ func GormMysql() *gorm.DB {
 		&models.DutyManagement{},
 		&models.DutySchedule{},
 		&models.AlertNotice{},
+		&models.AlertSilences{},
 	)
 	if err != nil {
 		global.Logger.Sugar().Error(err.Error())

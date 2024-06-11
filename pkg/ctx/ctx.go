@@ -5,6 +5,7 @@ import (
 	"alarm_collector/internal/ck"
 	"alarm_collector/internal/repo"
 	"context"
+	"sync"
 )
 
 type Context struct {
@@ -12,6 +13,7 @@ type Context struct {
 	Redis cache.InterEntryCache
 	CK    ck.InterEntryRepo
 	Ctx   context.Context
+	sync.RWMutex
 }
 
 var (

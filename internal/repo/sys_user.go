@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func newUserInterface(db *gorm.DB, g interGormDBCli) interUserRepo {
+func newUserInterface(db *gorm.DB, g InterGormDBCli) interUserRepo {
 	return &UserRepo{
 		entryRepo{
 			g:  g,

@@ -19,7 +19,7 @@ type (
 	}
 )
 
-func newNoticeInterface(db *gorm.DB, g interGormDBCli) interNoticeRepo {
+func newNoticeInterface(db *gorm.DB, g InterGormDBCli) interNoticeRepo {
 	return &NoticeRepo{
 		entryRepo{
 			g:  g,

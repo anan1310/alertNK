@@ -12,6 +12,7 @@ type (
 
 	InterEntryRepo interface {
 		DB() *gorm.DB
+		PrometheusDataSource() InterPrometheusSource
 	}
 )
 
@@ -23,3 +24,6 @@ func NewClickHouseRepoEntry() InterEntryRepo {
 }
 
 func (e *entryRepo) DB() *gorm.DB { return e.db }
+func (e *entryRepo) PrometheusDataSource() InterPrometheusSource {
+	return NewPrometheusDataSource(e.db)
+}

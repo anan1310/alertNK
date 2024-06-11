@@ -13,6 +13,6 @@ type clickhouse struct {
 }
 
 func (c *clickhouse) Dsn() string {
-	tcpInfo := "tcp://%s?username=%s&password=%s&database=%s&read_timeout=5&write_timeout=5&compress=true"
+	tcpInfo := "tcp://%s?username=%s&password=%s&database=%s&read_timeout=10s&compress=true"
 	return fmt.Sprintf(tcpInfo, c.Host, c.UserName, c.PassWord, c.DataBase)
 }

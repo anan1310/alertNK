@@ -19,9 +19,13 @@ type AlertSilences struct {
 	Comment        string `json:"comment"`
 }
 
+func (AlertSilences) TableName() string {
+	return "sys_alert_silences"
+}
+
 type AlertSilenceQuery struct {
 	TenantId       string `json:"tenantId" form:"tenantId"`
-	Id             string `json:"id" form:"id"`
+	ID             string `json:"id" form:"id"`
 	Fingerprint    string `json:"fingerprint" form:"fingerprint"`
 	Datasource     string `json:"datasource" form:"datasource"`
 	DatasourceType string `json:"datasourceType" form:"datasourceType"`

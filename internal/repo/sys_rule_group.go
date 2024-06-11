@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func newRuleGroupInterface(db *gorm.DB, g interGormDBCli) interRuleGroupRepo {
+func newRuleGroupInterface(db *gorm.DB, g InterGormDBCli) interRuleGroupRepo {
 	return &RuleGroupRepo{
 		entryRepo{
 			g:  g,

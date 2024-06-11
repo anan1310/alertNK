@@ -9,14 +9,14 @@ type GormDBCli struct {
 	db *gorm.DB
 }
 
-type interGormDBCli interface {
+type InterGormDBCli interface {
 	Create(table, value interface{}) error
 	Update(value Update) error
 	Updates(value Updates) error
 	Delete(value Delete) error
 }
 
-func NewInterGormDBCli(db *gorm.DB) interGormDBCli {
+func NewInterGormDBCli(db *gorm.DB) InterGormDBCli {
 	return &GormDBCli{
 		db,
 	}

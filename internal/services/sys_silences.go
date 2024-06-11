@@ -16,7 +16,7 @@ type alertSilenceService struct {
 type interSilenceService interface {
 	Update(req interface{}) (interface{}, interface{})
 	Delete(req interface{}) (interface{}, interface{})
-	List(req interface{}) (interface{}, interface{}, interface{})
+	ListSilence(req interface{}) (interface{}, interface{}, interface{})
 	Create(req interface{}) (interface{}, interface{})
 }
 
@@ -95,7 +95,7 @@ func (ass alertSilenceService) Delete(req interface{}) (interface{}, interface{}
 	return nil, nil
 }
 
-func (ass alertSilenceService) List(req interface{}) (interface{}, interface{}, interface{}) {
+func (ass alertSilenceService) ListSilence(req interface{}) (interface{}, interface{}, interface{}) {
 	r := req.(*models.AlertSilenceQuery)
 	data, total, err := ass.ctx.DB.Silence().List(*r)
 	if err != nil {

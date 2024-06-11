@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func newDutyCalendarInterface(db *gorm.DB, g interGormDBCli) interDutyCalendar {
+func newDutyCalendarInterface(db *gorm.DB, g InterGormDBCli) interDutyCalendar {
 	return &DutyCalendarRepo{
 		entryRepo{
 			g:  g,

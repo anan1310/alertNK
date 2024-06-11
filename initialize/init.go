@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"alarm_collector/alert"
 	"alarm_collector/core"
 	"alarm_collector/global"
 	"alarm_collector/internal/cache"
@@ -26,5 +27,7 @@ func InitBasic() {
 
 	newContext := ctx.NewContext(context.Background(), dbRepo, rCache, ckRepo)
 	services.NewServices(newContext)
+	// 启用告警评估协程
+	alert.Initialize(newContext)
 
 }

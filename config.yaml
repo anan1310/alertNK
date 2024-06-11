@@ -21,6 +21,14 @@ mysql:
   maxOpenConns: 100
   config: charset=utf8&parseTime=True&loc=Local
 
+clickhouse:
+  host: 123.56.214.170:9000
+  database: metric
+  username: clickhouse_operator
+  password: clickhouse_operator_password
+  maxIdleConns: 10
+  maxOpenConns: 100
+
 redis:
   host: 121.36.93.234
   port: 6321
@@ -29,3 +37,20 @@ redis:
 jwt:
   # 失效时间
   expire: 18000
+
+zap:
+  compress: true
+  maxage: 30
+  maxbackups: 200
+  maxsize: 10
+  level: info     #日志级别
+  format: console    #输出 json 或者 console
+  path: log       #日志输出目录
+  showLine: true  #显示行号
+  encodeLevel: LowercaseColorLevelEncoder
+  logInConsole: true  #输出控制台
+
+# 1）LowercaseLevelEncoder 小写编码器(默认)
+# 2）LowercaseColorLevelEncoder 小写编码器带颜色
+# 3）CapitalLevelEncoder  大写编码器
+# 4） CapitalColorLevelEncoder 大写编码带颜色

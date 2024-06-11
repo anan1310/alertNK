@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func newDutyManagerInterface(db *gorm.DB, g interGormDBCli) interDutyManagerRepo {
+func newDutyManagerInterface(db *gorm.DB, g InterGormDBCli) interDutyManagerRepo {
 	return &DutyManagerRepo{
 		entryRepo{
 			g:  g,
