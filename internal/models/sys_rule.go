@@ -8,7 +8,7 @@ type NoticeGroup []map[string]string
 
 type AlertRule struct {
 	TenantId             string        `json:"tenantId"`
-	RuleId               string        `json:"ruleId" gorm:"ruleId"`
+	RuleId               string        `json:"ruleId" gorm:"ruleId"`                               //告警规则ID
 	RuleGroupId          string        `json:"ruleGroupId"`                                        //所属告警组
 	DatasourceType       string        `json:"datasourceType"`                                     //监控类型
 	StrategyType         string        `json:"strategyType"`                                       //策略类型
@@ -18,13 +18,13 @@ type AlertRule struct {
 	RepeatNoticeInterval int64         `json:"repeatNoticeInterval"`                               //重复通知间隔时间
 	Description          string        `json:"description"`                                        //描述信息
 	EffectiveTime        EffectiveTime `json:"effectiveTime" gorm:"effectiveTime;serializer:json"` //告警周期
-	Severity             string        `json:"severity"`
+	Severity             string        `json:"severity"`                                           //告警程度
 	// Prometheus
-	PrometheusConfig PrometheusConfig `json:"prometheusConfig" gorm:"prometheusConfig;serializer:json"`
+	PrometheusConfig PrometheusConfig `json:"prometheusConfig" gorm:"prometheusConfig;serializer:json"` //prometheus相关配置
 
 	NoticeId    string      `json:"noticeId"`
 	NoticeGroup NoticeGroup `json:"noticeGroup" gorm:"noticeGroup;serializer:json"` //告警通知模版ID
-	Enabled     *bool       `json:"enabled" gorm:"enabled"`
+	Enabled     *bool       `json:"enabled" gorm:"enabled"`                         //是否开启告警
 }
 
 func (AlertRule) TableName() string {
@@ -50,10 +50,11 @@ type EffectiveTime struct {
 }
 
 type PrometheusConfig struct {
-	ForDuration       int64   `json:"forDuration"`       //告警持续时间
-	ComplexExpression string  `json:"complexExpression"` //复合条件
-	Rules             []Rules `json:"rules"`             //告警规则
-	IsUnionRule       int     `json:"isUnionRule"`       //逻辑判断条件（0:||,1:&&.2:复合条件：(1 AND 2) OR 3）
+	ForDuration       int64             `json:"forDuration"`       //告警持续时间
+	ComplexExpression string            `json:"complexExpression"` //复合条件
+	AlertSource       map[string]string `json:"alertSource"`       //告警源
+	Rules             []Rules           `json:"rules"`             //告警规则
+	IsUnionRule       int               `json:"isUnionRule"`       //逻辑判断条件（0:||,1:&&.2:复合条件：(1 AND 2) OR 3）
 }
 
 // Rules 告警条件规则

@@ -1,9 +1,137 @@
 package process
 
 import (
+	"alarm_collector/alert/queue"
+	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
 )
+
+// GetSliceDifference 获取差异key. 当slice1中存在, slice2不存在则标记为可恢复告警
+func GetSliceDifference(slice1 []string, slice2 []string) []string {
+	difference := []string{}
+
+	// 遍历缓存
+	for _, item1 := range slice1 {
+		found := false
+		// 遍历当前key
+		for _, item2 := range slice2 {
+			if item1 == item2 {
+				found = true
+				break
+			}
+		}
+		// 添加到差异切片中
+		if !found {
+			difference = append(difference, item1)
+		}
+	}
+
+	return difference
+}
+
+// GetSliceSame 获取相同key, 当slice1中存在, slice2也存在则标记为正在告警中撤销告警恢复
+func GetSliceSame(slice1 []string, slice2 []string) []string {
+	same := []string{}
+	for _, item1 := range slice1 {
+		for _, item2 := range slice2 {
+			if item1 == item2 {
+				same = append(same, item1)
+			}
+		}
+	}
+	return same
+}
+
+/*
+GcPendingCache
+清理 Pending 数据的缓存.
+场景: 第一次查询到有异常的指标会写入 Pending 缓存, 当该指标持续 Pending 到达持续时间后才会写入 Firing 缓存,
+那么未到达持续时间并且该指标恢复正常, 那么就需要清理该指标的 Pending 数据.
+*/
+func GcPendingCache(ctx *ctx.Context, rule models.AlertRule, curKeys []string) {
+	pendingKeys, err := ctx.Redis.Rule().GetAlertPendingCacheKeys(models.AlertRuleQuery{
+		TenantId:         rule.TenantId,
+		RuleId:           rule.RuleId,
+		RuleGroupId:      rule.RuleGroupId,
+		DatasourceIdList: rule.DatasourceIdList,
+	})
+	if err != nil {
+		return
+	}
+
+	gcPendingKeys := GetSliceDifference(pendingKeys, curKeys)
+	for _, key := range gcPendingKeys {
+		ctx.Redis.Event().DelCache(key)
+	}
+}
+
+func GcRecoverWaitCache(rule models.AlertRule, curKeys []string) {
+	// 获取等待恢复告警的keys
+	recoverWaitKeys := getRecoverWaitList(queue.RecoverWaitMap, rule)
+	// 删除正常告警的key
+	firingKeys := GetSliceSame(recoverWaitKeys, curKeys)
+	for _, key := range firingKeys {
+		delete(queue.RecoverWaitMap, key)
+	}
+}
+
+func getRecoverWaitList(m map[string]int64, rule models.AlertRule) []string {
+	var l []string
+	for k, _ := range m {
+		// 只获取当前规则组的告警。
+		keyPrefix := fmt.Sprintf("%s", models.FiringAlertCachePrefix+rule.RuleId+"-"+rule.DatasourceIdList[0]+"-")
+		if strings.HasPrefix(k, keyPrefix) {
+			l = append(l, k)
+		}
+	}
+	return l
+}
+
+// ParserDuration 获取时间区间的开始时间
+func ParserDuration(curTime time.Time, logScope int, timeType string) time.Time {
+
+	duration, err := time.ParseDuration(strconv.Itoa(logScope) + timeType)
+	if err != nil {
+		global.Logger.Sugar().Error("解析相对时间失败 ->", err.Error())
+		return time.Time{}
+	}
+	startsAt := curTime.Add(-duration)
+
+	return startsAt
+
+}
+
+// GetNoticeGroupId 获取告警分组的通知ID
+func GetNoticeGroupId(alert models.AlertCurEvent) string {
+	if len(alert.NoticeGroup) != 0 {
+		var noticeGroup []map[string]string
+		for _, v := range alert.NoticeGroup {
+			noticeGroup = append(noticeGroup, map[string]string{
+				v["key"]:   v["value"],
+				"noticeId": v["noticeId"],
+			})
+		}
+
+		// 从Metric中获取Key/Value
+		for metricKey, metricValue := range alert.Metric {
+			// 如果配置分组的Key/Value 和 Metric中的Key/Value 一致，则使用分组的 noticeId，匹配不到则用默认的。
+			for _, noticeInfo := range noticeGroup {
+				value, ok := noticeInfo[metricKey]
+				if ok && metricValue == value {
+					noticeId := noticeInfo["noticeId"]
+					return noticeId
+				}
+			}
+		}
+	}
+
+	return alert.NoticeId
+}
 
 // GetRedisFiringKeys 获取缓存所有Firing的Keys
 func GetRedisFiringKeys(ctx *ctx.Context) []string {
@@ -53,6 +181,24 @@ func ParserDefaultEvent(rule models.AlertRule) models.AlertCurEvent {
 
 	return event
 
+}
+
+func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) string {
+	user := ctx.DB.DutyCalendar().GetDutyUserInfo(noticeData.DutyId, time.Now().Format("2006-1-2"))
+	fmt.Println(user)
+	switch noticeData.NoticeType {
+	case "FeiShu":
+		// 判断是否有安排值班人员
+		//if len(user.DutyUserId) > 1 {
+		//	return fmt.Sprintf("<at id=%s></at>", user.DutyUserId)
+		//}
+	case "DingDing":
+		//if len(user.DutyUserId) > 1 {
+		//	return fmt.Sprintf("%s", user.DutyUserId)
+		//}
+	}
+
+	return ""
 }
 
 func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {

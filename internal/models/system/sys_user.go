@@ -1,19 +1,30 @@
 package system
 
 import (
-	"alarm_collector/global"
+	"time"
 )
 
 // SysUser 用户表
 type SysUser struct {
-	global.BaseModel
-	UserId   int    `json:"userId" gorm:"column:user_id;not null;unique;primary_key;comment:用户ID;size:20"` // 角色ID
-	Username string `json:"userName" gorm:"column:user_name;comment:用户登录名"`                                // 用户登录名
-	Password string `json:"passWord"  gorm:"column:pass_word;comment:用户登录密码"`                              // 用户登录密码
-	NickName string `json:"nickName" gorm:"column:nick_name;default:系统用户;comment:用户昵称"`                    //用户昵称
-	Status   string `json:"status" gorm:"column:status;comment:用户状态"`                                      // 用户状态 0=正常,1=停用
-	LoginIp  string `json:"loginIp" gorm:"column:login_ip;comment:登陆IP"`                                   // 登陆IP
-	DelFlag  string `json:"delFlag" gorm:"column:del_flag;default:0;comment:删除标志（0代表存在 2代表删除)"`            // 删除标志（0代表存在 2代表删除）
+	UserID      int64      `json:"user_id"`               // 用户ID
+	DeptID      *int64     `json:"dept_id,omitempty"`     // 部门ID
+	UserName    string     `json:"user_name"`             // 用户账号
+	NickName    string     `json:"nick_name"`             // 用户昵称
+	UserType    string     `json:"user_type,omitempty"`   // 用户类型（00系统用户）
+	Email       string     `json:"email,omitempty"`       // 用户邮箱
+	PhoneNumber string     `json:"phonenumber,omitempty"` // 手机号码
+	Sex         string     `json:"sex,omitempty"`         // 用户性别（0男 1女 2未知）
+	Avatar      string     `json:"avatar,omitempty"`      // 头像地址
+	Password    string     `json:"password,omitempty"`    // 密码
+	Status      string     `json:"status,omitempty"`      // 帐号状态（0正常 1停用）
+	DelFlag     string     `json:"del_flag,omitempty"`    // 删除标志（0代表存在 2代表删除）
+	LoginIP     string     `json:"login_ip,omitempty"`    // 最后登录IP
+	LoginDate   *time.Time `json:"login_date,omitempty"`  // 最后登录时间
+	CreateBy    string     `json:"create_by,omitempty"`   // 创建者
+	CreateTime  *time.Time `json:"create_time,omitempty"` // 创建时间
+	UpdateBy    string     `json:"update_by,omitempty"`   // 更新者
+	UpdateTime  *time.Time `json:"update_time,omitempty"` // 更新时间
+	Remark      string     `json:"remark,omitempty"`      // 备注
 }
 
 /*

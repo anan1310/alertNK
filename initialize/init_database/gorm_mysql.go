@@ -34,7 +34,7 @@ func GormMysql() *gorm.DB {
 		&models.RuleGroups{},
 		&models.DutyManagement{},
 		&models.DutySchedule{},
-		&models.AlertNotice{},
+		//&models.AlertNotice{},
 		&models.AlertSilences{},
 	)
 	if err != nil {

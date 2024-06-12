@@ -2,6 +2,7 @@ package consumer
 
 import (
 	"alarm_collector/alert/process"
+	"alarm_collector/alert/sender"
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
@@ -29,7 +30,7 @@ type InterEvalConsume interface {
 	Run()
 }
 
-func NewInterEvalConsume(ctx *ctx.Context) InterEvalConsume {
+func NewInterEvalConsumeWork(ctx *ctx.Context) InterEvalConsume {
 	return &Consume{
 		ctx:                ctx,
 		alertsMap:          make(map[string][]models.AlertCurEvent),
@@ -116,9 +117,11 @@ func (ec *Consume) filterAlerts(alerts []models.AlertCurEvent) map[string][]mode
 
 // 告警事件提取到内存中
 func (ec *Consume) addAlertToRuleIdMap(alert models.AlertCurEvent) {
+	// 锁定
 	ec.Lock()
-	ec.alertsMap[alert.RuleId] = append(ec.alertsMap[alert.RuleId], alert)
-	ec.Unlock()
+	defer ec.Unlock()
+	// 直接替换或添加告警
+	ec.alertsMap[alert.RuleId] = []models.AlertCurEvent{alert}
 }
 
 // 清除本地缓存
@@ -184,8 +187,7 @@ func (ec *Consume) fireAlertEvent(alertsMap map[string][]models.AlertCurEvent) {
 	wg.Wait()
 
 	for _, alerts := range ec.preStoreAlertGroup {
-		fmt.Println(alerts) //推送告警
-		//ec.handleAlert(alerts)
+		ec.handleAlert(alerts)
 	}
 }
 
@@ -256,4 +258,59 @@ func (ec *Consume) addAlertToGroupByRuleId(alert models.AlertCurEvent) {
 // hash
 func (ec *Consume) calculateGroupHash(key, value string) string {
 	return hash.Md5Hash([]byte(key + ":" + value))
+}
+
+// 推送告警
+func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
+	if alerts == nil {
+		return
+	}
+
+	var (
+		content  string
+		alertOne models.AlertCurEvent
+		curTime  = time.Now().Unix()
+	)
+
+	if len(alerts) > 1 {
+		content = fmt.Sprintf("聚合 %d 条告警\n", len(alerts))
+		for _, alert := range alerts {
+			content += fmt.Sprintf("告警名称: %s, 告警信息: %s\n", alert.RuleName, alert.Rules[0].Description)
+		}
+	}
+
+	// 告警聚合,减少告警噪音， 每组告警取第一位的告警数据
+	alertOne = alerts[0]
+	alertOne.Annotations += "\n" + content
+
+	noticeId := process.GetNoticeGroupId(alertOne)
+
+	r := models.NoticeQuery{
+		TenantId: alertOne.TenantId,
+		ID:       noticeId,
+	}
+	noticeData, _ := ec.ctx.DB.Notice().Get(r)
+
+	var wg sync.WaitGroup
+	for _, alert := range alerts {
+		alert.DutyUser = process.GetDutyUser(ec.ctx, noticeData)
+		//如果告警没有恢复
+		if !alert.IsRecovered {
+			wg.Add(1)
+			go func(alert models.AlertCurEvent) {
+				defer wg.Done()
+				alert.LastSendTime = curTime
+				ec.ctx.Redis.Event().SetCache("Firing", alert, 0)
+			}(alert)
+		}
+	}
+	wg.Wait()
+
+	// 开始告警 指定告警方式
+	err := sender.Sender(ec.ctx, alertOne, noticeData)
+	if err != nil {
+		global.Logger.Sugar().Errorf(err.Error())
+		return
+	}
+
 }

@@ -12,11 +12,11 @@ type DutySchedule struct {
 	TenantId string `json:"tenantId"`
 	DutyId   string `json:"dutyId"`
 	Time     string `json:"time"`
-	Users
+	DutyUser Users  `json:"dutyUser" gorm:"duty_user;serializer:json"`
 }
 
 type Users struct {
-	UserId   string `json:"userid"`
+	UserId   int    `json:"userId"`
 	Username string `json:"username"`
 }
 

@@ -2,11 +2,12 @@ package query
 
 import (
 	"alarm_collector/alert/process"
+	"alarm_collector/alert/queue"
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
 	"alarm_collector/pkg/utils/common"
-	"fmt"
+	"time"
 )
 
 type RuleQuery struct {
@@ -23,6 +24,50 @@ func (rq *RuleQuery) Query(ctx *ctx.Context, rule models.AlertRule) {
 	}
 
 }
+func (rq *RuleQuery) alertRecover(rule models.AlertRule, curKeys []string) {
+	firingKeys, err := rq.ctx.Redis.Rule().GetAlertFiringCacheKeys(models.AlertRuleQuery{
+		TenantId:         rule.TenantId,
+		RuleId:           rule.RuleId,
+		DatasourceIdList: rule.DatasourceIdList,
+	})
+	if err != nil {
+		return
+	}
+	// 获取已恢复告警的keys
+	recoverKeys := process.GetSliceDifference(firingKeys, curKeys)
+	if recoverKeys == nil || len(recoverKeys) == 0 {
+		return
+	}
+
+	curTime := time.Now().Unix()
+	for _, key := range recoverKeys {
+		event := rq.ctx.Redis.Event().GetCache(key)
+		if event.IsRecovered == true {
+			return
+		}
+
+		if _, exists := queue.RecoverWaitMap[key]; !exists {
+			// 如果没有，则记录当前时间
+			queue.RecoverWaitMap[key] = curTime
+			continue
+		}
+
+		// 判断是否在等待时间范围内
+		rt := time.Unix(queue.RecoverWaitMap[key], 0).Add(time.Minute * time.Duration(global.Config.Server.RecoverWait)).Unix()
+		if rt > curTime {
+			continue
+		}
+
+		event.IsRecovered = true
+		event.RecoverTime = curTime
+		event.LastSendTime = 0
+
+		rq.ctx.Redis.Event().SetCache("Firing", event, 0)
+
+		// 触发恢复删除带恢复中的 key
+		delete(queue.RecoverWaitMap, key)
+	}
+}
 
 // Prometheus 数据源
 func (rq *RuleQuery) prometheus(rule models.AlertRule) {
@@ -32,9 +77,17 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 		rules         = rule.PrometheusConfig.Rules
 		targetMapping = new(common.MyString)
 
+		alertSourceMap = rule.PrometheusConfig.AlertSource
+
 		curFiringKeys  = &[]string{}
 		curPendingKeys = &[]string{}
 	)
+
+	defer func() {
+		go process.GcPendingCache(rq.ctx, rule, *curPendingKeys)
+		rq.alertRecover(rule, *curFiringKeys)
+		go process.GcRecoverWaitCache(rule, *curFiringKeys)
+	}()
 
 	size := len(rules)
 	for i, r := range rules {
@@ -55,10 +108,10 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	}
 	//获取数据源的值  如果达到告警的阈值 那么就写入redis缓冲中
 	s := models.PrometheusDataSourceQuery{
-		MetricType:    "linux",
-		MetricName:    "master",
+		MetricType:    alertSourceMap["metricType"],
+		MetricName:    alertSourceMap["metricName"],
+		Pid:           alertSourceMap["pid"],
 		TargetMapping: targetMapping.Str(),
-		Pid:           "4",
 	}
 	//获取告警源
 	alertSource, err := rq.ctx.CK.PrometheusDataSource().Get(s)
@@ -68,12 +121,10 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	global.Logger.Sugar().Info("告警源前数据-->", alertSource)
 	err, conditionStack, severity := ParsePromRule(alarmRule.Str(), alertSource)
 	global.Logger.Sugar().Info("告警源后数据-->", alertSource)
-	fmt.Println(*severity)
-	// 如果最终条件为真，则触发告警
+	// 如果最终条件为真，推送告警到redis中
 	if len(conditionStack) == 1 && conditionStack[0] {
-		//将告警推送到redis中
-		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, *severity)
-		global.Logger.Sugar().Info("触发告警,告警规则")
+		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
+		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
 	} else {
 		return
 	}

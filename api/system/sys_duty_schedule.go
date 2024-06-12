@@ -35,3 +35,11 @@ func (DutyCalendarApi) List(ctx *gin.Context) {
 		return services.DutyCalendarService.List(r)
 	})
 }
+func (DutyCalendarApi) GetDutyUserInfo(ctx *gin.Context) {
+	r := new(models.DutyScheduleQuery)
+	response.BindQuery(ctx, r)
+
+	response.Service(ctx, func() (interface{}, interface{}) {
+		return services.DutyCalendarService.GetDutyUserInfo(r), nil
+	})
+}

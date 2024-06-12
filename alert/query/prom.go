@@ -19,12 +19,12 @@ var (
 	}
 )
 
-// ParsePromRule 逆波兰表达式
-func ParsePromRule(alarmRule string, valueMap map[string]interface{}) (error, []bool, *string) {
+func ParsePromRule(alarmRule string, valueMap map[string]interface{}) (error, []bool, string) {
 	// 2、解析告警规则
 	conditionStack := make([]bool, 0)  // 用于存储表达式结果的栈
 	operatorStack := make([]string, 0) // 用于存储操作符的栈
-	severity := new(string)
+
+	var severity string
 
 	// 遍历规则字符串，解析出表达式和操作符
 	for _, condition := range strings.Split(alarmRule, ",") { //condition： system_cpu_usage < 0.1
@@ -62,7 +62,7 @@ func ParsePromRule(alarmRule string, valueMap map[string]interface{}) (error, []
 			operatorStack = append(operatorStack, condition)
 		} else {
 			// 如果是比较运算符，则将表达式的结果压入栈中
-			_, conditionStack = recordAlarm(condition, severity, valueMap, conditionStack)
+			_, conditionStack = recordAlarm(condition, &severity, valueMap, conditionStack)
 
 		}
 	}
@@ -115,7 +115,6 @@ func recordAlarm(rule string, severity *string, metricsMap map[string]interface{
 	if conditionMet {
 		conditionStack = append(conditionStack, true)
 	} else {
-
 		delete(metricsMap, targetMapping)
 		conditionStack = append(conditionStack, false)
 	}
@@ -139,8 +138,8 @@ func parseRule(rule string, severity *string) (paramStr string, operator string,
 	operator = strings.TrimSpace(parts[1])
 	valueStr := strings.TrimSpace(parts[2])
 	if len(parts) == 4 {
-		severityTmp := strings.TrimSpace(parts[3])
-		severity = &severityTmp
+		//severityTmp := strings.TrimSpace(parts[3])
+		*severity = strings.TrimSpace(parts[3])
 	}
 	// 转换 alarmValue 为 float64 类型
 	alarmValue, err = common.ToFloat64(valueStr)

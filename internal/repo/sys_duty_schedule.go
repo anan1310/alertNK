@@ -1,7 +1,9 @@
 package repo
 
 import (
+	"alarm_collector/global"
 	"alarm_collector/internal/models"
+	"alarm_collector/internal/models/system"
 	"fmt"
 	"gorm.io/gorm"
 	"time"
@@ -13,6 +15,7 @@ type (
 	}
 
 	interDutyCalendar interface {
+		GetDutyUserInfo(dutyId, time string) system.SysUser
 		GetCalendarInfo(dutyId, time string) models.DutySchedule
 		Create(r models.DutySchedule) error
 		Update(r models.DutySchedule) error
@@ -32,11 +35,26 @@ func newDutyCalendarInterface(db *gorm.DB, g InterGormDBCli) interDutyCalendar {
 func (dc DutyCalendarRepo) GetCalendarInfo(dutyId, time string) models.DutySchedule {
 	var dutySchedule models.DutySchedule
 
-	dc.db.Model(models.DutySchedule{}).
+	if err := dc.db.Model(models.DutySchedule{}).
 		Where("duty_id = ? AND time = ?", dutyId, time).
-		First(&dutySchedule)
+		First(&dutySchedule).Error; err != nil {
+		global.Logger.Sugar().Error("get calendar info error", err.Error())
+	}
 
 	return dutySchedule
+}
+
+// GetDutyUserInfo 获取值班用户信息
+func (dc DutyCalendarRepo) GetDutyUserInfo(dutyId, time string) system.SysUser {
+	var user system.SysUser
+
+	schedule := dc.GetCalendarInfo(dutyId, time)
+
+	dc.db.Model(system.SysUser{}).
+		Where("user_id = ?", schedule.DutyUser.UserId).
+		First(&user)
+
+	return user
 }
 
 func (dc DutyCalendarRepo) Create(r models.DutySchedule) error {

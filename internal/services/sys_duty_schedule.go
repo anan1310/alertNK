@@ -19,6 +19,7 @@ type interDutyCalendarService interface {
 	CreateAndUpdate(req interface{}) (interface{}, interface{})
 	Update(req interface{}) (interface{}, interface{})
 	List(req interface{}) (interface{}, interface{})
+	GetDutyUserInfo(req interface{}) interface{}
 }
 
 func newInterDutyCalendarService(ctx *ctx.Context) interDutyCalendarService {
@@ -84,7 +85,7 @@ func (dms dutyCalendarService) CreateAndUpdate(req interface{}) (interface{}, in
 				TenantId: r.TenantId,
 				DutyId:   r.DutyId,
 				Time:     dutyTime,
-				Users: models.Users{
+				DutyUser: models.Users{
 					UserId:   user.UserId,
 					Username: user.Username,
 				},
@@ -156,6 +157,10 @@ func (dms dutyCalendarService) List(req interface{}) (interface{}, interface{}) 
 	return data, nil
 }
 
+func (dms dutyCalendarService) GetDutyUserInfo(req interface{}) interface{} {
+	r := req.(*models.DutyScheduleQuery)
+	return dms.ctx.DB.DutyCalendar().GetDutyUserInfo(r.DutyId, r.Time)
+}
 func parseTime(month string) (int, time.Month, int) {
 	parsedTime, err := time.Parse(layout, month)
 	if err != nil {
