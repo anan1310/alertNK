@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	Layout = "2006-01-02T15:04:05.000Z"
+	Layout = "2006-01-02 15:04:05"
 	Config config.Config
 	Viper  *viper.Viper
 	Logger *zap.Logger

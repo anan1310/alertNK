@@ -7,5 +7,6 @@ type Config struct {
 	Clickhouse clickhouse `mapstructure:"clickhouse"`
 	Zap        zap        `mapstructure:"zap"`
 	Server     server     `mapstructure:"server"`
+	Mail       mail       `mapstructure:"mail"`
 	JWT        jWT        `mapstructure:"jwt"`
 }

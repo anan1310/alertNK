@@ -3,20 +3,16 @@ package templates
 import "alarm_collector/internal/models"
 
 type Template struct {
-	CardContentMsg string
+	alert  models.AlertCurEvent
+	notice models.AlertNotice
+}
+type InterTemplate interface {
+	SendAlertEmail() error
 }
 
-func NewTemplate(alert models.AlertCurEvent, notice models.AlertNotice) Template {
-	switch notice.NoticeType {
-	case "FeiShu":
-		return Template{CardContentMsg: "飞书"}
-	case "DingDing":
-		return Template{CardContentMsg: "钉钉"}
-	case "QQ":
-		return Template{}
-	case "SMS":
-		return Template{}
+func NewTemplate(alert models.AlertCurEvent, notice models.AlertNotice) InterTemplate {
+	return Template{
+		alert:  alert,
+		notice: notice,
 	}
-
-	return Template{}
 }

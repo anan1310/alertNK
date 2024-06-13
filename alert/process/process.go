@@ -4,6 +4,7 @@ import (
 	"alarm_collector/alert/queue"
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
+	"alarm_collector/internal/models/system"
 	"alarm_collector/pkg/ctx"
 	"fmt"
 	"strconv"
@@ -174,7 +175,7 @@ func ParserDefaultEvent(rule models.AlertRule) models.AlertCurEvent {
 		NoticeGroup:          rule.NoticeGroup,
 		IsRecovered:          false,
 		RepeatNoticeInterval: rule.RepeatNoticeInterval,
-		DutyUser:             "暂无", // 默认暂无值班人员, 渲染模版时会实际判断 Notice 是否存在值班人员
+		DutyUser:             system.SysUser{UserName: "暂无"}, // 默认暂无值班人员, 渲染模版时会实际判断 Notice 是否存在值班人员
 		Severity:             rule.Severity,
 		EffectiveTime:        rule.EffectiveTime,
 	}
@@ -183,22 +184,9 @@ func ParserDefaultEvent(rule models.AlertRule) models.AlertCurEvent {
 
 }
 
-func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) string {
+func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) system.SysUser {
 	user := ctx.DB.DutyCalendar().GetDutyUserInfo(noticeData.DutyId, time.Now().Format("2006-1-2"))
-	fmt.Println(user)
-	switch noticeData.NoticeType {
-	case "FeiShu":
-		// 判断是否有安排值班人员
-		//if len(user.DutyUserId) > 1 {
-		//	return fmt.Sprintf("<at id=%s></at>", user.DutyUserId)
-		//}
-	case "DingDing":
-		//if len(user.DutyUserId) > 1 {
-		//	return fmt.Sprintf("%s", user.DutyUserId)
-		//}
-	}
-
-	return ""
+	return user
 }
 
 func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {

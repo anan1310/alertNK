@@ -24,6 +24,8 @@ func (rq *RuleQuery) Query(ctx *ctx.Context, rule models.AlertRule) {
 	}
 
 }
+
+// 告警恢复
 func (rq *RuleQuery) alertRecover(rule models.AlertRule, curKeys []string) {
 	firingKeys, err := rq.ctx.Redis.Rule().GetAlertFiringCacheKeys(models.AlertRuleQuery{
 		TenantId:         rule.TenantId,
@@ -69,6 +71,12 @@ func (rq *RuleQuery) alertRecover(rule models.AlertRule, curKeys []string) {
 	}
 }
 
+/*
+	恢复告警逻辑很简单，alert/query/query.go(alertRecover 方法)，
+	根据每个规则的query的response 和 redis缓存进行对比取差异值，
+	（缓存中存在，query response不存在则视为恢复，会把恢复的key丢到 recoverWaitGroup中 等待多久后依然触发恢复则视为恢复，等待时间由配置文件的recoverWait决定）
+*/
+
 // Prometheus 数据源
 func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	//聚合告警规则
@@ -82,7 +90,7 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 		curFiringKeys  = &[]string{}
 		curPendingKeys = &[]string{}
 	)
-
+	//当前prometheus 执行完成后执行下面方法
 	defer func() {
 		go process.GcPendingCache(rq.ctx, rule, *curPendingKeys)
 		rq.alertRecover(rule, *curFiringKeys)
@@ -102,6 +110,14 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 				alarmRule.A(",||,")
 			}
 		case 1:
+			//system_cpu_usage < 0.1,&&,load1 > 0.2
+			alarmRule.A(r.TargetMapping + " " + r.Operator + " " + common.StrVal(r.Value) + " " + r.Severity)
+			//拼接字段
+			targetMapping.A(r.TargetMapping)
+			if i < size-1 {
+				targetMapping.A(",")
+				alarmRule.A(",&&,")
+			}
 		case 2:
 
 		}
@@ -110,6 +126,7 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	s := models.PrometheusDataSourceQuery{
 		MetricType:    alertSourceMap["metricType"],
 		MetricName:    alertSourceMap["metricName"],
+		MetricHost:    alertSourceMap["metricHost"],
 		Pid:           alertSourceMap["pid"],
 		TargetMapping: targetMapping.Str(),
 	}
@@ -121,12 +138,15 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	global.Logger.Sugar().Info("告警源前数据-->", alertSource)
 	err, conditionStack, severity := ParsePromRule(alarmRule.Str(), alertSource)
 	global.Logger.Sugar().Info("告警源后数据-->", alertSource)
+	if err != nil || len(alertSource) == 0 {
+		return
+	}
+
 	// 如果最终条件为真，推送告警到redis中
 	if len(conditionStack) == 1 && conditionStack[0] {
+		severity = global.ParseAlertLevel(severity).String()
 		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
 		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
-	} else {
-		return
 	}
 
 }

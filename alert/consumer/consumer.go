@@ -289,12 +289,17 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 		TenantId: alertOne.TenantId,
 		ID:       noticeId,
 	}
+	//告警通知模版
 	noticeData, _ := ec.ctx.DB.Notice().Get(r)
 
 	var wg sync.WaitGroup
-	for _, alert := range alerts {
+	for i, alert := range alerts {
 		alert.DutyUser = process.GetDutyUser(ec.ctx, noticeData)
-		//如果告警没有恢复
+		if i == 0 {
+			//聚合第一条告警信息通知人
+			alertOne.DutyUser = process.GetDutyUser(ec.ctx, noticeData)
+		}
+		//如果告警没有恢复，更新缓冲信息
 		if !alert.IsRecovered {
 			wg.Add(1)
 			go func(alert models.AlertCurEvent) {

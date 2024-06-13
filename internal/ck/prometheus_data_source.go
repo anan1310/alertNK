@@ -29,7 +29,7 @@ func (pds PrometheusDataSource) Get(r models.PrometheusDataSourceQuery) (map[str
 		db      = pds.db.Table("metric_" + r.MetricType)
 		dataMap = make(map[string]interface{})
 	)
-	if err := db.Debug().Select(r.TargetMapping).Where("name = ? and pid = ? ", r.MetricName, r.Pid).Order("create_time desc").Limit(1).Scan(&dataMap).Error; err != nil {
+	if err := db.Select(r.TargetMapping).Where("name = ? and pid = ? ", r.MetricName, r.Pid).Order("create_time desc").Limit(1).Scan(&dataMap).Error; err != nil {
 		return nil, err
 	}
 	return dataMap, nil

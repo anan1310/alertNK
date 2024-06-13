@@ -33,6 +33,13 @@ redis:
   host: 121.36.93.234
   port: 6321
   pass: Weihu2022@
+ # 告警邮箱
+mail:
+  host: "smtp.163.com"
+  pass: "SYDWVDNAXUSMQXMP"
+  port: 465
+  to: ""
+  smtpUser: "Anzj1997@163.com"
 
 jwt:
   # 失效时间

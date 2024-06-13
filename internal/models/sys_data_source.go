@@ -4,6 +4,7 @@ package models
 type PrometheusDataSourceQuery struct {
 	MetricType    string `json:"metricType"`
 	MetricName    string `json:"metricName"`
+	MetricHost    string `json:"metricHost"`
 	TargetMapping string `json:"targetMapping"` //所选指标
 	Pid           string `json:"pid"`
 }

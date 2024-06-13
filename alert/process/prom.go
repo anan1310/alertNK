@@ -12,7 +12,9 @@ func CalIndicatorValue(ctx *ctx.Context, curFiringKeys, curPendingKeys *[]string
 	event.DatasourceId = rule.DatasourceIdList[0]
 	event.Metric = metricMap
 	event.Metric["severity"] = severity
+	event.Metric["instance"] = rule.PrometheusConfig.AlertSource["metricHost"]
 	event.Severity = severity
+
 	//触发的告警规则
 	for _, rules := range rule.PrometheusConfig.Rules {
 		if _, ok := metricMap[rules.TargetMapping]; ok {
