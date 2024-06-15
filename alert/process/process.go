@@ -189,6 +189,34 @@ func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) system.SysUser
 	return user
 }
 
+// RecordAlertHisEvent 记录历史告警
+func RecordAlertHisEvent(ctx *ctx.Context, alert models.AlertCurEvent) error {
+	hisData := models.AlertHisEvent{
+		TenantId:         alert.TenantId,
+		DatasourceType:   alert.DatasourceType,
+		DatasourceId:     alert.DatasourceId,
+		Fingerprint:      alert.Fingerprint,
+		RuleId:           alert.RuleId,
+		RuleName:         alert.RuleName,
+		Severity:         alert.Severity,
+		Metric:           alert.Metric,
+		EvalInterval:     alert.EvalInterval,
+		Annotations:      alert.Annotations,
+		IsRecovered:      true,
+		FirstTriggerTime: alert.FirstTriggerTime,
+		LastEvalTime:     alert.LastEvalTime,
+		LastSendTime:     alert.LastSendTime,
+		RecoverTime:      alert.RecoverTime,
+	}
+
+	err := ctx.DB.HistoryEvent().CreateHistoryEvent(hisData)
+	if err != nil {
+		return fmt.Errorf("RecordAlertHisEvent -> %s", err)
+	}
+
+	return nil
+}
+
 func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {
 	ctx.Lock()
 	defer ctx.Unlock()

@@ -8,6 +8,8 @@ type Template struct {
 }
 type InterTemplate interface {
 	SendAlertEmail() error
+	SendAlertSMS() error
+	SendAlertDingDing() error
 }
 
 func NewTemplate(alert models.AlertCurEvent, notice models.AlertNotice) InterTemplate {

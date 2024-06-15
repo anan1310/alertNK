@@ -20,6 +20,7 @@ type (
 		Notice() interNoticeRepo
 		Silence() interSilenceRepo //告警静默
 		Rule() interRuleRepo
+		HistoryEvent() interEventRepo
 	}
 )
 
@@ -40,3 +41,4 @@ func (e *entryRepo) DutyManager() interDutyManagerRepo { return newDutyManagerIn
 func (e *entryRepo) DutyCalendar() interDutyCalendar   { return newDutyCalendarInterface(e.db, e.g) }
 func (e *entryRepo) Notice() interNoticeRepo           { return newNoticeInterface(e.db, e.g) }
 func (e *entryRepo) Silence() interSilenceRepo         { return newSilenceInterface(e.db, e.g) }
+func (e *entryRepo) HistoryEvent() interEventRepo      { return newEventInterface(e.db, e.g) }

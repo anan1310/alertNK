@@ -1,46 +1,26 @@
 package templates
 
 import (
-	"alarm_collector/global"
 	"alarm_collector/internal/models"
+	"alarm_collector/internal/models/system"
+	"alarm_collector/pkg/utils/cmd"
+	"alarm_collector/pkg/utils/http_util"
+	"bytes"
 	"fmt"
-	"gopkg.in/gomail.v2"
 )
 
-//邮箱模版
+func (t Template) SendAlertDingDing() error {
 
-func (t Template) SendAlertEmail() error {
-	// 配置SMTP服务器
-	smtpHost := global.Config.Mail.Host
-	smtpPort := global.Config.Mail.Port
-	smtpUser := global.Config.Mail.SmtpUser
-	smtpPass := global.Config.Mail.Pass
-
-	// 生成邮件内容
-	emailBody := emailTemplate(t.alert)
-
-	// 创建新的邮件消息
-	m := gomail.NewMessage()
-	m.SetHeader("From", smtpUser)
-	m.SetHeader("To", t.alert.DutyUser.Email)
-	m.SetHeader("Subject", "告警通知")
-	m.SetBody("text/html", emailBody)
-
-	// 发送邮件
-	d := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
-	fmt.Println(d)
-	/*
-		err := d.DialAndSend(m)
-		if err != nil {
-			return err
-		}
-
-	*/
-
+	dingTemplate := bytes.NewReader([]byte(dingDingTemplate(t.alert)))
+	//dingTemplate := dingDingTemplate(t.alert)
+	_, err := http_util.Post(t.notice.Hook, dingTemplate)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func emailTemplate(alert models.AlertCurEvent) string {
+func dingDingTemplate(alert models.AlertCurEvent) string {
 	templateStr := `
 	{{- define "Title" -}}
         {{- if not .IsRecovered -}}
@@ -60,7 +40,6 @@ func emailTemplate(alert models.AlertCurEvent) string {
 
     {{ define "Event" -}}
         {{- if not .IsRecovered -}}
-           <br>
             **🤖 告警类型:** ${rule_name}<br>
             **🫧 告警指纹:** ${fingerprint}<br>
             **📌 告警等级:** ${severity}<br>
@@ -73,7 +52,7 @@ func emailTemplate(alert models.AlertCurEvent) string {
         {{- else -}}
             **🤖 告警类型:** ${rule_name}<br>
             **🫧 告警指纹:** ${fingerprint}<br>
-            **📌 告警等级:** P${severity}<br>
+            **📌 告警等级:** ${severity}<br>
             **🖥 告警主机:** ${metric.instance}<br>
             **🕘 开始时间:** ${first_trigger_time_format}<br>
             **🕘 恢复时间:** ${recover_time_format}<br>
@@ -83,15 +62,27 @@ func emailTemplate(alert models.AlertCurEvent) string {
     {{ end }}
 
     {{- define "Footer" -}}
-        🧑‍💻 即时设计 - 运维团队
+        
     {{- end }}
 `
 
 	Title := ParserTemplate("Title", alert, templateStr)
+	TitleColor := ParserTemplate("TitleColor", alert, templateStr)
 	Event := ParserTemplate("Event", alert, templateStr)
-	Footer := ParserTemplate("Footer", alert, templateStr)
+	//Footer := ParserTemplate("Footer", alert, templateStr)
+	markdownContent := fmt.Sprintf("<font color=\"%s\">**%s**</font>\n\n%s\n\n", TitleColor, Title, Event)
 
-	t := Title + "\n" + Event + "\n" + Footer
-
-	return t
+	t := system.DingMsg{
+		Msgtype: "markdown",
+		Markdown: system.Markdown{
+			Title: Title,
+			Text:  markdownContent,
+		},
+		At: system.At{
+			AtUserIds: []string{alert.DutyUser.UserName},
+			IsAtAll:   false,
+		},
+	}
+	cardContentString := cmd.JsonMarshal(t)
+	return cardContentString
 }

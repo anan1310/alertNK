@@ -51,7 +51,7 @@ func (dc DutyCalendarRepo) GetDutyUserInfo(dutyId, time string) system.SysUser {
 	schedule := dc.GetCalendarInfo(dutyId, time)
 
 	dc.db.Model(system.SysUser{}).
-		Where("user_id = ?", schedule.DutyUser.UserId).
+		Where("user_id = ? and status = '0'", schedule.DutyUser.UserId).
 		First(&user)
 
 	return user

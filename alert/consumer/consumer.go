@@ -170,15 +170,13 @@ func (ec *Consume) fireAlertEvent(alertsMap map[string][]models.AlertCurEvent) {
 				ec.addAlertToGroup(alert)
 				if alert.IsRecovered {
 					ec.removeAlertFromCache(alert)
-					/*
-						//记录历史告警
-							err := process.RecordAlertHisEvent(ec.ctx, alert)
-							if err != nil {
-								global.Logger.Sugar().Error(err.Error())
-								return
-							}
+					//记录历史告警
+					err := process.RecordAlertHisEvent(ec.ctx, alert)
+					if err != nil {
+						global.Logger.Sugar().Error(err.Error())
+						return
+					}
 
-					*/
 				}
 			}(alert)
 		}
@@ -294,11 +292,7 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 
 	var wg sync.WaitGroup
 	for i, alert := range alerts {
-		alert.DutyUser = process.GetDutyUser(ec.ctx, noticeData)
-		if i == 0 {
-			//聚合第一条告警信息通知人
-			alertOne.DutyUser = process.GetDutyUser(ec.ctx, noticeData)
-		}
+		alerts[i].DutyUser = process.GetDutyUser(ec.ctx, noticeData)
 		//如果告警没有恢复，更新缓冲信息
 		if !alert.IsRecovered {
 			wg.Add(1)
@@ -310,7 +304,8 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 		}
 	}
 	wg.Wait()
-
+	//聚合第一条告警信息通知人
+	alertOne.DutyUser = alerts[0].DutyUser
 	// 开始告警 指定告警方式
 	err := sender.Sender(ec.ctx, alertOne, noticeData)
 	if err != nil {

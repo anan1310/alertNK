@@ -1,6 +1,6 @@
 package system
 
-type EmailMsg struct {
+type DingMsg struct {
 	Msgtype  string   `json:"msgtype"`
 	Markdown Markdown `json:"markdown"`
 	At       At       `json:"at"`
