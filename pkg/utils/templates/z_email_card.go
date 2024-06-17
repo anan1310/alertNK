@@ -3,6 +3,7 @@ package templates
 import (
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
+	"alarm_collector/pkg/utils/common"
 	"fmt"
 	"gopkg.in/gomail.v2"
 )
@@ -16,26 +17,30 @@ func (t Template) SendAlertEmail() error {
 	smtpUser := global.Config.Mail.SmtpUser
 	smtpPass := global.Config.Mail.Pass
 
+	emailBody := new(common.MyString)
 	// 生成邮件内容
-	emailBody := emailTemplate(t.alert)
+	for i, alert := range t.alerts {
+		template := emailTemplate(alert)
+		if i < len(t.alerts) {
+			emailBody.A(fmt.Sprintf("第 %d 告警规则信息：\n", i))
+		}
+		emailBody.A(template).A("\n")
+	}
 
 	// 创建新的邮件消息
 	m := gomail.NewMessage()
 	m.SetHeader("From", smtpUser)
-	m.SetHeader("To", t.alert.DutyUser.Email)
+	m.SetHeader("To", t.alerts[0].DutyUser.Email)
 	m.SetHeader("Subject", "告警通知")
-	m.SetBody("text/html", emailBody)
+	m.SetBody("text/html", emailBody.Str())
 
 	// 发送邮件
 	d := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
-	fmt.Println(d)
-	/*
-		err := d.DialAndSend(m)
-		if err != nil {
-			return err
-		}
 
-	*/
+	err := d.DialAndSend(m)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

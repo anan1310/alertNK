@@ -13,6 +13,7 @@ var (
 	DutyCalendarService interDutyCalendarService
 	NoticeService       interNoticeService
 	SilenceService      interSilenceService
+	EventService        InterEventService
 )
 
 func NewServices(ctx *ctx.Context) {
@@ -24,4 +25,5 @@ func NewServices(ctx *ctx.Context) {
 	DutyCalendarService = newInterDutyCalendarService(ctx)
 	NoticeService = newInterAlertNoticeService(ctx)
 	SilenceService = newInterSilenceService(ctx)
+	EventService = newInterEventService(ctx)
 }

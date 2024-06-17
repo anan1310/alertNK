@@ -22,6 +22,10 @@ type AlertHisEvent struct {
 	Duration         int64                  `json:"duration"`              //告警持续时间
 }
 
+func (AlertHisEvent) TableName() string {
+	return "sys_history_event"
+}
+
 type AlertHisEventQuery struct {
 	TenantId       string `json:"tenantId" form:"tenantId"`
 	DatasourceId   string `json:"datasourceId" form:"datasourceId"`

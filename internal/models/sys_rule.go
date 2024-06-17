@@ -10,9 +10,10 @@ type AlertRule struct {
 	TenantId             string        `json:"tenantId"`
 	RuleId               string        `json:"ruleId" gorm:"ruleId"`                               //告警规则ID
 	RuleGroupId          string        `json:"ruleGroupId"`                                        //所属告警组
-	DatasourceType       string        `json:"datasourceType"`                                     //监控类型
-	StrategyType         string        `json:"strategyType"`                                       //策略类型
-	DatasourceIdList     []string      `json:"datasourceId" gorm:"datasourceId;serializer:json"`   //数据源列表
+	DatasourceType       string        `json:"datasourceType"`                                     //告警类型 Prometheus  Log  Apm
+	MetricsParent        string        `json:"metricsParent"`                                      //告警大类
+	MetricsChild         string        `json:"metricsChild"`                                       //告警小类
+	DatasourceIdList     []string      `json:"datasourceId" gorm:"datasourceId;serializer:json"`   //数据源列表: 当前一个告警源对应一个数据源列表
 	RuleName             string        `json:"ruleName"`                                           //规则名称
 	EvalInterval         int64         `json:"evalInterval"`                                       //执行频率
 	RepeatNoticeInterval int64         `json:"repeatNoticeInterval"`                               //重复通知间隔时间

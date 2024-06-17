@@ -3,7 +3,7 @@ package templates
 import "alarm_collector/internal/models"
 
 type Template struct {
-	alert  models.AlertCurEvent
+	alerts []models.AlertCurEvent
 	notice models.AlertNotice
 }
 type InterTemplate interface {
@@ -12,9 +12,9 @@ type InterTemplate interface {
 	SendAlertDingDing() error
 }
 
-func NewTemplate(alert models.AlertCurEvent, notice models.AlertNotice) InterTemplate {
+func NewTemplate(alerts []models.AlertCurEvent, notice models.AlertNotice) InterTemplate {
 	return Template{
-		alert:  alert,
+		alerts: alerts,
 		notice: notice,
 	}
 }

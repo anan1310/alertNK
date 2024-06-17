@@ -80,7 +80,7 @@ func (ec *Consume) Run() {
 			ec.Timing[key]++
 		}
 	}
-
+	//告警推送 每隔多长时间推送一次 默认是一秒
 	ticker := time.Tick(time.Second)
 
 	go func() {
@@ -275,6 +275,8 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 		for _, alert := range alerts {
 			content += fmt.Sprintf("告警名称: %s, 告警信息: %s\n", alert.RuleName, alert.Rules[0].Description)
 		}
+	} else {
+
 	}
 
 	// 告警聚合,减少告警噪音， 每组告警取第一位的告警数据
@@ -291,9 +293,13 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 	noticeData, _ := ec.ctx.DB.Notice().Get(r)
 
 	var wg sync.WaitGroup
-	for i, alert := range alerts {
+
+	for i := range alerts {
 		alerts[i].DutyUser = process.GetDutyUser(ec.ctx, noticeData)
-		//如果告警没有恢复，更新缓冲信息
+	}
+
+	for _, alert := range alerts {
+		// 如果告警没有恢复，更新缓冲信息
 		if !alert.IsRecovered {
 			wg.Add(1)
 			go func(alert models.AlertCurEvent) {
@@ -303,11 +309,12 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 			}(alert)
 		}
 	}
+
 	wg.Wait()
 	//聚合第一条告警信息通知人
-	alertOne.DutyUser = alerts[0].DutyUser
+	//alertOne.DutyUser = alerts[0].DutyUser
 	// 开始告警 指定告警方式
-	err := sender.Sender(ec.ctx, alertOne, noticeData)
+	err := sender.Sender(ec.ctx, alerts, noticeData)
 	if err != nil {
 		global.Logger.Sugar().Errorf(err.Error())
 		return

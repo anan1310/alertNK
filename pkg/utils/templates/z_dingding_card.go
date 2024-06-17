@@ -10,8 +10,18 @@ import (
 )
 
 func (t Template) SendAlertDingDing() error {
-
-	dingTemplate := bytes.NewReader([]byte(dingDingTemplate(t.alert)))
+	/*
+		dingDingBody := new(common.MyString)
+		// 生成邮件内容
+		for i, alert := range t.alerts {
+			template := dingDingTemplate(alert)
+			if i < len(t.alerts) {
+				dingDingBody.A(fmt.Sprintf("第 %d 告警规则信息：\n", i))
+			}
+			dingDingBody.A(template).A("----\n")
+		}
+	*/
+	dingTemplate := bytes.NewReader([]byte(dingDingTemplate(t.alerts[0])))
 	//dingTemplate := dingDingTemplate(t.alert)
 	_, err := http_util.Post(t.notice.Hook, dingTemplate)
 	if err != nil {

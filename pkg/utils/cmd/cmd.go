@@ -58,11 +58,14 @@ func JsonMarshal(v interface{}) string {
 // ParserVariables 处理告警内容中变量形式的字符串，替换为对应的值
 func ParserVariables(annotations string, data map[string]interface{}) string {
 	// 使用正则表达式匹配变量形式的字符串
-	re := regexp.MustCompile(`\$\{(.*?)\}`)
+	re := regexp.MustCompile(`\$\{(.*?)}`)
 
 	// 使用正则表达式替换所有匹配的变量
 	return re.ReplaceAllStringFunc(annotations, func(match string) string {
 		variable := match[2 : len(match)-1] // 提取变量名
+		if variable == "severity" {
+			return global.ParseAlertLevel(fmt.Sprintf("%v", getJSONValue(data, variable))).String()
+		}
 		return fmt.Sprintf("%v", getJSONValue(data, variable))
 	})
 }

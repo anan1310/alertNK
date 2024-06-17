@@ -1,6 +1,9 @@
 package models
 
-import "alarm_collector/internal/models/system"
+import (
+	"alarm_collector/internal/models/system"
+	"alarm_collector/pkg/utils/common"
+)
 
 const (
 	FiringAlertCachePrefix  = "firing-alert-"
@@ -43,6 +46,8 @@ type AlertCurEventQuery struct {
 	DatasourceType string `json:"datasourceType" form:"datasourceType"`
 	DatasourceId   string `json:"datasourceId" form:"datasourceId"`
 	Fingerprint    string `json:"fingerprint" form:"fingerprint"`
+	Severity       string `json:"severity" form:"severity"`
+	common.PageInfo
 }
 
 func (ace *AlertCurEvent) GetFiringAlertCacheKey() string {

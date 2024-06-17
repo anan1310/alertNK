@@ -62,6 +62,7 @@ func routersInit() *gin.Engine {
 		v1.RouterGroupApp.SystemRouter.InitDutyCalendarRouter(PrivateGroup)
 		v1.RouterGroupApp.SystemRouter.InitNoticeRouter(PrivateGroup)
 		v1.RouterGroupApp.SystemRouter.InitSilencesRouter(PrivateGroup)
+		v1.RouterGroupApp.SystemRouter.InitAlertEventRouter(PrivateGroup)
 	}
 
 	return r

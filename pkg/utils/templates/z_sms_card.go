@@ -27,15 +27,21 @@ func (t Template) SendAlertSMS() error {
 		smsSignature = "【盛易信达】" //短信签名
 	)
 	content := new(common.MyString)
-	phoneNumber := t.alert.DutyUser.PhoneNumber
+	phoneNumber := t.alerts[0].DutyUser.PhoneNumber
 	//短信告警人
 	if common.IsEmptyStr(phoneNumber) {
 		return fmt.Errorf("无效的手机号码")
 	}
 	//短信内容
-	smsContent := smsTemplate(t.alert)
+	content.A(smsSignature)
 	//短信内容
-	content.A(smsSignature).A(smsContent)
+	for i, alert := range t.alerts {
+		smsContent := smsTemplate(alert)
+		if i < len(t.alerts) {
+			content.A(fmt.Sprintf("第 %d 告警规则信息：\n", i))
+		}
+		content.A(smsContent).A("\n")
+	}
 	params := map[string]string{
 		"mobile":  phoneNumber,
 		"content": content.Str(),

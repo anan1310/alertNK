@@ -12,7 +12,7 @@ const (
 
 // 为 AlertLevel 类型实现 String 方法，方便打印
 func (a AlertLevel) String() string {
-	return [...]string{"紧急", "严重", "一般", "未知"}[a]
+	return [...]string{"紧急", "严重", "提示", "未知"}[a]
 }
 
 func ParseAlertLevel(level string) AlertLevel {

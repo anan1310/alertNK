@@ -53,7 +53,7 @@ func (arw *AlertRuleWork) Run() {
 
 }
 
-func (arw *AlertRuleWork) worker(rule models.AlertRule, ctx context.Context) {
+func (arw *AlertRuleWork) workerBak(rule models.AlertRule, ctx context.Context) {
 	// 执行频率 比如10秒一次
 	ei := time.Second * time.Duration(rule.EvalInterval)
 	timer := time.NewTimer(ei)
@@ -73,6 +73,25 @@ func (arw *AlertRuleWork) worker(rule models.AlertRule, ctx context.Context) {
 
 	}
 
+}
+
+func (arw *AlertRuleWork) worker(rule models.AlertRule, ctx context.Context) {
+	// 执行频率，比如10秒一次
+	ei := time.Second * time.Duration(rule.EvalInterval)
+	ticker := time.NewTicker(ei)
+	defer ticker.Stop() // 在函数退出前停止ticker，释放资源
+
+	for {
+		select {
+		case <-ticker.C:
+			global.Logger.Sugar().Infof("规则评估 -> %v", rule)
+			arw.Query(arw.ctx, rule) // 使用传入的ctx，而不是arw.ctx
+
+		case <-ctx.Done():
+			global.Logger.Sugar().Infof("停止 RuleId 为 %v 的 Watch 协程", rule.RuleId)
+			return
+		}
+	}
 }
 
 /*

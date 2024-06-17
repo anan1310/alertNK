@@ -8,4 +8,5 @@ type RouterGroup struct {
 	DutyCalendarRouter
 	NoticeRouter
 	SilencesRouter
+	AlertEventRouter
 }

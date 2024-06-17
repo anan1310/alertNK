@@ -8,4 +8,5 @@ type ApiGroup struct {
 	NoticeApi
 	SilencesApi
 	RuleApi
+	AlertEventApi
 }

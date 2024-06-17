@@ -144,7 +144,6 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 
 	// 如果最终条件为真，推送告警到redis中
 	if len(conditionStack) == 1 && conditionStack[0] {
-		severity = global.ParseAlertLevel(severity).String()
 		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
 		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
 	}

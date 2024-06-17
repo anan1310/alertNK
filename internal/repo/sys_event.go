@@ -11,7 +11,7 @@ type (
 	}
 
 	interEventRepo interface {
-		GetHistoryEvent(r models.AlertHisEventQuery) ([]models.AlertHisEvent, error)
+		GetHistoryEvent(r models.AlertHisEventQuery) ([]models.AlertHisEvent, int64, error)
 		CreateHistoryEvent(r models.AlertHisEvent) error
 	}
 )
@@ -25,7 +25,7 @@ func newEventInterface(db *gorm.DB, g InterGormDBCli) interEventRepo {
 	}
 }
 
-func (e EventRepo) GetHistoryEvent(r models.AlertHisEventQuery) ([]models.AlertHisEvent, error) {
+func (e EventRepo) GetHistoryEvent(r models.AlertHisEventQuery) ([]models.AlertHisEvent, int64, error) {
 	var (
 		historyEvents []models.AlertHisEvent
 		db            = e.db.Model(&models.AlertHisEvent{})
@@ -49,14 +49,14 @@ func (e EventRepo) GetHistoryEvent(r models.AlertHisEventQuery) ([]models.AlertH
 	limit := r.PageSize
 	offset := r.PageSize * (r.Page - 1)
 	if err := db.Count(&total).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if err := db.Limit(limit).Offset(offset).Order("recover_time desc").Find(&historyEvents).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return historyEvents, nil
+	return historyEvents, total, nil
 
 }
 
