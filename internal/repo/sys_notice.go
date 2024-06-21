@@ -2,6 +2,7 @@ package repo
 
 import (
 	"alarm_collector/internal/models"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 )
@@ -54,8 +55,13 @@ func (nr NoticeRepo) List(req models.NoticeQuery) ([]models.AlertNotice, int64, 
 }
 
 func (nr NoticeRepo) Create(r models.AlertNotice) error {
-	if err := nr.g.Create(models.AlertNotice{}, r); err != nil {
-		return err
+	var alertNotice models.AlertNotice
+	if !errors.Is(nr.DB().Model(&models.AlertNotice{}).Where("tenant_id = ? and name = ?", r.TenantId, r.Name).First(&alertNotice).Error, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("告警通知对象 %s 已经存在", r.Name)
+	} else {
+		if err := nr.g.Create(models.AlertNotice{}, r); err != nil {
+			return err
+		}
 	}
 	return nil
 }

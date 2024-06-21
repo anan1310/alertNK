@@ -9,4 +9,5 @@ type ApiGroup struct {
 	SilencesApi
 	RuleApi
 	AlertEventApi
+	DashBoardInfoApi
 }

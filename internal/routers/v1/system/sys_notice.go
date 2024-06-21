@@ -2,13 +2,14 @@ package system
 
 import (
 	"alarm_collector/api"
+	"alarm_collector/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 type NoticeRouter struct{}
 
 func (ur *NoticeRouter) InitNoticeRouter(Router *gin.RouterGroup) {
-	noticeRouter := Router.Group("notice")
+	noticeRouter := Router.Group("notice").Use(middleware.ParseTenant())
 	noticeApi := api.ApiGroupApp.SystemApiGroup.NoticeApi
 	{
 		noticeRouter.GET("list", noticeApi.List)     //获取通知对象

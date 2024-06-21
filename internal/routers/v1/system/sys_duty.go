@@ -2,13 +2,14 @@ package system
 
 import (
 	"alarm_collector/api"
+	"alarm_collector/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 type DutyManagerRouter struct{}
 
 func (DutyManagerRouter) InitDutyManagerRouter(Router *gin.RouterGroup) {
-	dutyRouter := Router.Group("duty")
+	dutyRouter := Router.Group("duty").Use(middleware.ParseTenant())
 	dutyManagerApi := api.ApiGroupApp.SystemApiGroup.DutyManagerApi
 	{
 		dutyRouter.POST("", dutyManagerApi.Create)      //新增值班

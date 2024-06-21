@@ -8,11 +8,11 @@ type AlertNotice struct {
 	Name            string `json:"name"`
 	DutyId          string `json:"dutyId"`
 	NoticeType      string `json:"noticeType"`
-	EnableCard      string `json:"enableCard"`
-	Hook            string `json:"hook"`
-	Template        string `json:"template"`
-	TemplateFiring  string `json:"templateFiring"`
-	TemplateRecover string `json:"templateRecover"`
+	EnableCard      string `json:"enableCard,omitempty"`
+	Hook            string `json:"hook,omitempty"`
+	Template        string `json:"template,omitempty"`
+	TemplateFiring  string `json:"templateFiring,omitempty"`
+	TemplateRecover string `json:"templateRecover,omitempty"`
 }
 
 func (AlertNotice) TableName() string {

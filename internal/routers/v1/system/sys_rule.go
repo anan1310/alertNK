@@ -2,13 +2,14 @@ package system
 
 import (
 	"alarm_collector/api"
+	"alarm_collector/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 type RuleRouter struct{}
 
 func (RuleRouter) InitRuleRouter(Router *gin.RouterGroup) {
-	rule := Router.Group("rule")
+	rule := Router.Group("rule").Use(middleware.ParseTenant())
 	ruleApi := api.ApiGroupApp.SystemApiGroup.RuleApi
 	{
 		rule.POST("", ruleApi.Create)      //添加告警规则

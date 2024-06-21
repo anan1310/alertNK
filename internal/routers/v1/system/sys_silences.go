@@ -2,13 +2,14 @@ package system
 
 import (
 	"alarm_collector/api"
+	"alarm_collector/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 type SilencesRouter struct{}
 
 func (sr *SilencesRouter) InitSilencesRouter(Router *gin.RouterGroup) {
-	silencesRouter := Router.Group("silences")
+	silencesRouter := Router.Group("silences").Use(middleware.ParseTenant())
 	silencesApi := api.ApiGroupApp.SystemApiGroup.SilencesApi
 	{
 		silencesRouter.GET("list", silencesApi.List)     //获取静默规则

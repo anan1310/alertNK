@@ -49,6 +49,8 @@ func routersInit() *gin.Engine {
 	r.Use(
 		// 启用CORS中间件
 		middleware.Cors(),
+		// 拦截panic异常
+		middleware.Recovery(false),
 		// 自定义请求日志格式
 		gin.LoggerWithFormatter(middleware.RequestLoggerFormatter),
 	)
@@ -63,6 +65,7 @@ func routersInit() *gin.Engine {
 		v1.RouterGroupApp.SystemRouter.InitNoticeRouter(PrivateGroup)
 		v1.RouterGroupApp.SystemRouter.InitSilencesRouter(PrivateGroup)
 		v1.RouterGroupApp.SystemRouter.InitAlertEventRouter(PrivateGroup)
+		v1.RouterGroupApp.SystemRouter.InitDashBoardInfoRouter(PrivateGroup)
 	}
 
 	return r

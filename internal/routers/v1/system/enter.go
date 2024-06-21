@@ -9,4 +9,5 @@ type RouterGroup struct {
 	NoticeRouter
 	SilencesRouter
 	AlertEventRouter
+	DashBoardInfoRouter
 }

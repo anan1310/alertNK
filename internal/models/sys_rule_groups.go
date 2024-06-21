@@ -9,6 +9,7 @@ type RuleGroups struct {
 	Name        string `json:"name"`
 	Number      int    `json:"number"`
 	Description string `json:"description"`
+	//AlertRules  []AlertRule `json:"alertRules" gorm:"foreignKey:RuleGroupId;"`
 }
 
 func (RuleGroups) TableName() string {

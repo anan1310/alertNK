@@ -3,6 +3,7 @@ package system
 import (
 	"alarm_collector/internal/models"
 	"alarm_collector/internal/services"
+	"alarm_collector/middleware"
 	"alarm_collector/pkg/utils/common"
 	"alarm_collector/pkg/utils/response"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,9 @@ func (RuleApi) Create(ctx *gin.Context) {
 	r := new(models.AlertRule)
 	response.BindJson(ctx, r)
 
+	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
+	r.TenantId = tid.(string)
+
 	response.Service(ctx, func() (interface{}, interface{}) {
 		return services.RuleService.Create(r)
 	})
@@ -23,18 +27,21 @@ func (RuleApi) Update(ctx *gin.Context) {
 	r := new(models.AlertRule)
 	response.BindJson(ctx, r)
 
+	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
+	r.TenantId = tid.(string)
+
 	response.Service(ctx, func() (interface{}, interface{}) {
 		return services.RuleService.Update(r)
 	})
 }
 
 func (RuleApi) List(ctx *gin.Context) {
+	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	page := common.ToInt(ctx.Query("page"))
 	pageSize := common.ToInt(ctx.Query("pageSize"))
-	tenantId := ctx.Query("tenantId")
 	ruleGroupId := ctx.Query("ruleGroupId")
 	ruleQuery := models.AlertRuleQuery{
-		TenantId:    tenantId,
+		TenantId:    tid.(string),
 		RuleGroupId: ruleGroupId,
 		PageInfo: common.PageInfo{
 			Page:     page,
@@ -47,15 +54,13 @@ func (RuleApi) List(ctx *gin.Context) {
 }
 
 func (RuleApi) Delete(ctx *gin.Context) {
-	tenantId := ctx.Query("tenantId")
-	ruleId := ctx.Query("ruleId")
-	ruleGroupId := ctx.Query("ruleGroupId")
-	groupQuery := models.AlertRuleQuery{
-		TenantId:    tenantId,
-		RuleId:      ruleId,
-		RuleGroupId: ruleGroupId,
-	}
+
+	r := new(models.AlertRuleQuery)
+	response.BindQuery(ctx, r)
+
+	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
+	r.TenantId = tid.(string)
 	response.Service(ctx, func() (interface{}, interface{}) {
-		return services.RuleService.Delete(&groupQuery)
+		return services.RuleService.Delete(r)
 	})
 }

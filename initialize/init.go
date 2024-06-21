@@ -29,5 +29,7 @@ func InitBasic() {
 	services.NewServices(newContext)
 	// 启用告警评估协程
 	alert.Initialize(newContext)
+	//  初始化监控分析数据 (统计协程数)
+	InitResource(newContext)
 
 }

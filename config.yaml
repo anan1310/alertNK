@@ -1,6 +1,6 @@
 server:
-  httpPort: 9090
-  runMode: debug
+  httpPort: 9097
+  runMode: release
   readTimeout: 3600
   writeTimeout: 3600
   # 定义相同的Group之间发送告警通知的时间间隔(s), 组内有告警就一起发出, 没有则单独发出.
@@ -50,12 +50,12 @@ zap:
   maxage: 30
   maxbackups: 200
   maxsize: 10
-  level: info     #日志级别
+  level: error     #日志级别
   format: console    #输出 json 或者 console
   path: log       #日志输出目录
   showLine: true  #显示行号
   encodeLevel: LowercaseColorLevelEncoder
-  logInConsole: true  #输出控制台
+  logInConsole: false  #输出控制台
 
 # 1）LowercaseLevelEncoder 小写编码器(默认)
 # 2）LowercaseColorLevelEncoder 小写编码器带颜色
