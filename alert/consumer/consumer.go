@@ -6,7 +6,9 @@ import (
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
+	"alarm_collector/pkg/utils/common"
 	"alarm_collector/pkg/utils/hash"
+	"alarm_collector/pkg/utils/templates"
 	"fmt"
 	"time"
 
@@ -265,23 +267,24 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 	}
 
 	var (
-		content  string
+		content  = new(common.MyString)
 		alertOne models.AlertCurEvent
 		curTime  = time.Now().Unix()
 	)
 
 	if len(alerts) > 1 {
-		content = fmt.Sprintf("聚合 %d 条告警\n", len(alerts))
+		content.A(fmt.Sprintf("聚合 %d 条告警\n", len(alerts)))
 		for _, alert := range alerts {
-			content += fmt.Sprintf("告警名称: %s, 告警信息: %s\n", alert.RuleName, alert.Rules[0].Description)
+			content.A(templates.DetailTemplate(alert)).A("\n")
 		}
 	} else {
 
+		content.A(templates.DetailTemplate(alerts[0])).A("\n")
 	}
 
 	// 告警聚合,减少告警噪音， 每组告警取第一位的告警数据
 	alertOne = alerts[0]
-	alertOne.Annotations += "\n" + content
+	alerts[0].Annotations = content.Str()
 
 	noticeId := process.GetNoticeGroupId(alertOne)
 

@@ -2,7 +2,6 @@ package init_database
 
 import (
 	"alarm_collector/global"
-	"alarm_collector/internal/models"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -30,14 +29,14 @@ func GormMysql() *gorm.DB {
 	}
 	// 检查表结构是否变化，变化则进行迁移
 	err = DB.AutoMigrate(
-		&models.AlertRule{},
-		&models.RuleGroups{},
-		&models.DutyManagement{},
-		&models.DutySchedule{},
-		//&models.AlertNotice{},
-		&models.AlertSilences{},
-		&models.AlertHisEvent{},
-		&models.ServiceResource{},
+	//&models.AlertRule{},
+	//&models.RuleGroups{},
+	//&models.DutyManagement{},
+	//&models.DutySchedule{},
+	//&models.AlertNotice{},
+	//&models.AlertSilences{},
+	//&models.AlertHisEvent{},
+	//&models.ServiceResource{},
 	)
 	if err != nil {
 		global.Logger.Sugar().Error(err.Error())
