@@ -3,6 +3,7 @@ package repo
 import (
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/utils/cmd"
+	"alarm_collector/pkg/utils/common"
 	"fmt"
 	"gorm.io/gorm"
 	"time"
@@ -49,6 +50,9 @@ func (d DutyManagerRepo) List(req models.DutyManagementQuery) ([]models.DutyMana
 	limit := req.PageSize
 	offset := req.PageSize * (req.Page - 1)
 	db.Model(&models.DutyManagement{}).Where("tenant_id = ?", req.TenantId)
+	if !common.IsEmptyStr(req.Name) {
+		db = db.Where("name LIKE ?", "%"+req.Name+"%")
+	}
 	//查询总条数
 	db.Count(&total)
 	if err := db.Limit(limit).Offset(offset).Find(&data).Error; err != nil {

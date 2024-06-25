@@ -304,12 +304,14 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 	for _, alert := range alerts {
 		// 如果告警没有恢复，更新缓冲信息
 		if !alert.IsRecovered {
+			//保证每个协程都是独立的副本
+			alertCopy := alert
 			wg.Add(1)
 			go func(alert models.AlertCurEvent) {
 				defer wg.Done()
 				alert.LastSendTime = curTime
 				ec.ctx.Redis.Event().SetCache("Firing", alert, 0)
-			}(alert)
+			}(alertCopy)
 		}
 	}
 

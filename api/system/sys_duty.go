@@ -28,8 +28,10 @@ func (DutyManagerApi) List(ctx *gin.Context) {
 
 	page := common.ToInt(ctx.Query("page"))
 	pageSize := common.ToInt(ctx.Query("pageSize"))
+	name := ctx.Query("name")
 	dutyManagementQuery := models.DutyManagementQuery{
 		TenantId: tid.(string),
+		Name:     name,
 		PageInfo: common.PageInfo{
 			Page:     page,
 			PageSize: pageSize,
