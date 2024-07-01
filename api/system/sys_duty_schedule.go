@@ -12,7 +12,10 @@ type DutyCalendarApi struct{}
 
 func (DutyCalendarApi) Create(ctx *gin.Context) {
 	r := new(models.DutyScheduleCreate)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -25,7 +28,10 @@ func (DutyCalendarApi) Create(ctx *gin.Context) {
 
 func (DutyCalendarApi) Update(ctx *gin.Context) {
 	r := new(models.DutySchedule)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -38,7 +44,10 @@ func (DutyCalendarApi) Update(ctx *gin.Context) {
 
 func (DutyCalendarApi) List(ctx *gin.Context) {
 	r := new(models.DutyScheduleQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -50,7 +59,10 @@ func (DutyCalendarApi) List(ctx *gin.Context) {
 }
 func (DutyCalendarApi) GetDutyUserInfo(ctx *gin.Context) {
 	r := new(models.DutyScheduleQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)

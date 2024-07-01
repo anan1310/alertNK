@@ -10,7 +10,7 @@ type (
 		entryRepo
 	}
 	interUserRepo interface {
-		List() ([]system.SysUser, error)
+		List(userIds []int) ([]system.SysUser, error)
 	}
 )
 
@@ -23,8 +23,8 @@ func newUserInterface(db *gorm.DB, g InterGormDBCli) interUserRepo {
 	}
 }
 
-func (u UserRepo) List() ([]system.SysUser, error) {
+func (u UserRepo) List(userIds []int) ([]system.SysUser, error) {
 	var userList []system.SysUser
-	err := u.db.Where("del_flag = ?", "0").Find(&userList).Error
+	err := u.db.Where("del_flag = ? and user_id in (?)", "0", userIds).Find(&userList).Error
 	return userList, err
 }

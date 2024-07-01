@@ -6,7 +6,6 @@ import (
 	"alarm_collector/internal/models"
 	"encoding/json"
 	"github.com/go-redis/redis"
-	"log"
 	"time"
 )
 
@@ -54,14 +53,14 @@ func (ec eventCache) DelCache(key string) {
 	}
 
 	if err := iter.Err(); err != nil {
-		log.Fatal(err)
+		global.Logger.Sugar().Error("redis find keys error")
 	}
 
 	// 批量删除键
 	if len(keysToDelete) > 0 {
 		err := init_database.Redis.Del(keysToDelete...).Err()
 		if err != nil {
-			log.Fatal(err)
+			global.Logger.Sugar().Error("redis del err:", err)
 		}
 		global.Logger.Sugar().Infof("移除告警消息 -> %s\n", keysToDelete)
 	}

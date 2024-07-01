@@ -1,6 +1,8 @@
 package templates
 
-import "alarm_collector/internal/models"
+import (
+	"alarm_collector/internal/models"
+)
 
 type Template struct {
 	alerts []models.AlertCurEvent

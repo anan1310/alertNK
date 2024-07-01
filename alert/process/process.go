@@ -175,22 +175,44 @@ func ParserDefaultEvent(rule models.AlertRule) models.AlertCurEvent {
 		NoticeGroup:          rule.NoticeGroup,
 		IsRecovered:          false,
 		RepeatNoticeInterval: rule.RepeatNoticeInterval,
-		DutyUser:             system.SysUser{UserName: "暂无"}, // 默认暂无值班人员, 渲染模版时会实际判断 Notice 是否存在值班人员
+		DutyUser:             []system.SysUser{{UserName: "暂无"}}, // 默认暂无值班人员, 渲染模版时会实际判断 Notice 是否存在值班人员
 		Severity:             rule.Severity,
-		EffectiveTime:        rule.EffectiveTime,
 	}
 
 	return event
 
 }
 
-func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) system.SysUser {
-	user := ctx.DB.DutyCalendar().GetDutyUserInfo(noticeData.DutyId, time.Now().Format("2006-1-2"))
-	return user
+// GetDutyUser 获取值班人员
+func GetDutyUser(ctx *ctx.Context, noticeData models.AlertNotice) *system.SysUser {
+	user := ctx.DB.DutyCalendar().GetDutyUserInfo(noticeData.UserNotices.DutyId, time.Now().Format("2006-1-2"))
+	return &user
+}
+
+// GetAlertUsers 获取告警用户
+func GetAlertUsers(ctx *ctx.Context, noticeData models.AlertNotice) []system.SysUser {
+	alertUsers, _ := ctx.DB.SysUser().List(noticeData.UserNotices.UserIds)
+	return alertUsers
 }
 
 // RecordAlertHisEvent 记录历史告警
 func RecordAlertHisEvent(ctx *ctx.Context, alert models.AlertCurEvent) error {
+	//通知模版 目前一条告警规则只能匹配一条告警模版
+	/*
+		notice, _ := ctx.DB.Notice().Get(models.NoticeQuery{
+			TenantId: alert.TenantId,
+			ID:       alert.NoticeId,
+		})
+
+		if common.IsEmptyStr(notice.Name) {
+			//通知模版不存在 返回错误信息
+			return fmt.Errorf("告警模版为空")
+		}
+		ok := mute.IsMuted(ctx, &alert, notice)
+		if ok {
+			return nil
+		}
+	*/
 	hisData := models.AlertHisEvent{
 		TenantId:         alert.TenantId,
 		DatasourceType:   alert.DatasourceType,
@@ -201,7 +223,7 @@ func RecordAlertHisEvent(ctx *ctx.Context, alert models.AlertCurEvent) error {
 		Severity:         alert.Severity,
 		Metric:           alert.Metric,
 		EvalInterval:     alert.EvalInterval,
-		Annotations:      alert.Annotations,
+		Annotations:      strings.Replace(alert.Annotations, "[报警中] 🔥", "[已恢复] ✨", -1),
 		IsRecovered:      true,
 		FirstTriggerTime: alert.FirstTriggerTime,
 		LastEvalTime:     alert.LastEvalTime,
@@ -230,6 +252,8 @@ func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {
 		event.FirstTriggerTime = resFiring.FirstTriggerTime
 		event.LastEvalTime = ctx.Redis.Event().GetLastEvalTime(firingKey)
 		event.LastSendTime = resFiring.LastSendTime
+		//告警详情
+		event.Annotations = resFiring.Annotations
 	} else {
 		event.FirstTriggerTime = ctx.Redis.Event().GetFirstTime(pendingKey)
 		event.LastEvalTime = ctx.Redis.Event().GetLastEvalTime(pendingKey)

@@ -3,6 +3,7 @@ package repo
 import (
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/utils/cmd"
+	"alarm_collector/pkg/utils/common"
 	"gorm.io/gorm"
 )
 
@@ -39,6 +40,9 @@ func (rr RuleRepo) List(r models.AlertRuleQuery) ([]models.AlertRule, int64, err
 	offset := r.PageSize * (r.Page - 1)
 
 	db.Where("tenant_id = ? AND rule_group_id = ?", r.TenantId, r.RuleGroupId)
+	if !common.IsEmptyStr(r.NoticeId) {
+		db = db.Where("notice_id = ?", r.NoticeId)
+	}
 	//查询总条数
 	db.Count(&total)
 	err := db.Limit(limit).Offset(offset).Find(&data).Error

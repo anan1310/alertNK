@@ -4,10 +4,12 @@ import (
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
 	"alarm_collector/pkg/utils/cmd"
+	"sync"
 )
 
 type noticeService struct {
 	ctx *ctx.Context
+	sync.RWMutex
 }
 
 type interNoticeService interface {
@@ -20,10 +22,10 @@ type interNoticeService interface {
 
 func newInterAlertNoticeService(ctx *ctx.Context) interNoticeService {
 	return &noticeService{
-		ctx,
+		ctx: ctx,
 	}
 }
-func (n noticeService) Get(req interface{}) (interface{}, interface{}) {
+func (n *noticeService) Get(req interface{}) (interface{}, interface{}) {
 	r := req.(*models.NoticeQuery)
 	data, err := n.ctx.DB.Notice().Get(*r)
 	if err != nil {
@@ -32,7 +34,7 @@ func (n noticeService) Get(req interface{}) (interface{}, interface{}) {
 
 	return data, nil
 }
-func (n noticeService) List(req interface{}) (interface{}, interface{}, interface{}) {
+func (n *noticeService) List(req interface{}) (interface{}, interface{}, interface{}) {
 	r := req.(*models.NoticeQuery)
 	data, total, err := n.ctx.DB.Notice().List(*r)
 	if err != nil {
@@ -41,7 +43,7 @@ func (n noticeService) List(req interface{}) (interface{}, interface{}, interfac
 	return data, total, nil
 }
 
-func (n noticeService) Create(req interface{}) (interface{}, interface{}) {
+func (n *noticeService) Create(req interface{}) (interface{}, interface{}) {
 	r := req.(*models.AlertNotice)
 	r.ID = "n-" + cmd.RandId()
 	if err := n.ctx.DB.Notice().Create(*r); err != nil {
@@ -49,14 +51,17 @@ func (n noticeService) Create(req interface{}) (interface{}, interface{}) {
 	}
 	return nil, nil
 }
-func (n noticeService) Update(req interface{}) (interface{}, interface{}) {
+func (n *noticeService) Update(req interface{}) (interface{}, interface{}) {
+	n.Lock()
+	defer n.Unlock()
 	r := req.(*models.AlertNotice)
 	if err := n.ctx.DB.Notice().Update(*r); err != nil {
 		return nil, err
 	}
 	return nil, nil
 }
-func (n noticeService) Delete(req interface{}) (interface{}, interface{}) {
+
+func (n *noticeService) Delete(req interface{}) (interface{}, interface{}) {
 	r := req.(*models.NoticeQuery)
 	if err := n.ctx.DB.Notice().Delete(*r); err != nil {
 		return nil, err

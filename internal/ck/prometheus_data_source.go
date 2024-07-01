@@ -32,5 +32,6 @@ func (pds PrometheusDataSource) Get(r models.PrometheusDataSourceQuery) (map[str
 	if err := db.Select(r.TargetMapping).Where("name = ? and pid = ? ", r.MetricName, r.Pid).Order("create_time desc").Limit(1).Scan(&dataMap).Error; err != nil {
 		return nil, err
 	}
+	//如果targetExpression不为空。查询出上面的内容
 	return dataMap, nil
 }

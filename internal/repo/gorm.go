@@ -25,7 +25,7 @@ func NewInterGormDBCli(db *gorm.DB) InterGormDBCli {
 func (g GormDBCli) Create(table, value interface{}) error {
 
 	tx := g.db.Begin()
-	err := tx.Model(table).Create(value).Error
+	err := tx.Debug().Model(table).Create(value).Error
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("数据写入失败 -> %s", err)

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type Sms struct {
@@ -27,21 +28,29 @@ func (t Template) SendAlertSMS() error {
 		smsSignature = "【盛易信达】" //短信签名
 	)
 	content := new(common.MyString)
-	phoneNumber := t.alerts[0].DutyUser.PhoneNumber
+
+	var phoneNumbers []string
+	for _, u := range t.alerts[0].DutyUser {
+		phoneNumbers = append(phoneNumbers, u.PhoneNumber)
+	}
+	phoneNumber := strings.Join(phoneNumbers, ",")
 	//短信告警人
 	if common.IsEmptyStr(phoneNumber) {
 		return fmt.Errorf("无效的手机号码")
 	}
 	//短信内容
-	content.A(smsSignature)
+	content.A(smsSignature).A(t.alerts[0].Annotations)
 	//短信内容
-	for i, alert := range t.alerts {
-		smsContent := smsTemplate(alert)
-		if i < len(t.alerts) {
-			content.A(fmt.Sprintf("第 %d 告警规则信息：\n", i))
+	/*
+		for i, alert := range t.alerts {
+			smsContent := smsTemplate(alert)
+			if i < len(t.alerts) {
+				content.A(fmt.Sprintf("第 %d 告警规则信息：\n", i+1))
+			}
+			content.A(smsContent).A("\n")
 		}
-		content.A(smsContent).A("\n")
-	}
+	*/
+	//mobile 手机号，多个英文逗号分隔，最多1W个
 	params := map[string]string{
 		"mobile":  phoneNumber,
 		"content": content.Str(),
@@ -77,50 +86,56 @@ func (s *Sms) sendSms() error {
 }
 
 func smsTemplate(alert models.AlertCurEvent) string {
+	// 定义模板字符串
 	templateStr := `
 	{{- define "Title" -}}
-        {{- if not .IsRecovered -}}
-[报警中] 🔥 
-        {{- else -}}
-[已恢复] ✨ 
-        {{- end -}}
-    {{- end }}
-
-    {{- define "TitleColor" -}}
-        {{- if not .IsRecovered -}}
-            red
-        {{- else -}}
-            green
-        {{- end -}}
-    {{- end }}
-
-    {{ define "Event" -}}
-        {{- if not .IsRecovered -}}
-🤖 告警类型: ${rule_name}
-🫧 告警指纹: ${fingerprint}
-📌 告警等级: ${severity}
-🖥 告警主机: ${metric.instance}
-🕘 开始时间: ${first_trigger_time_format}
-👤 值班人员: ${duty_user.user_name}
-📝 报警事件: {{ range .Rules -}}
-		  {{ .MetricName }} {{ .Operator }} {{ .Value }}{{ .Unit }}, 
-	  {{- end }}
-        {{- else -}}
- 🤖 告警类型: ${rule_name}
- 🫧 告警指纹:  ${fingerprint}
- 📌 告警等级:  P${severity}
- 🖥 告警主机:  ${metric.instance}
- 🕘 开始时间:  ${first_trigger_time_format}
- 🕘 恢复时间:  ${recover_time_format}
- 👤 值班人员:  ${duty_user.user_name}  
- 📝 报警事件:  ${annotations}
-        {{- end -}}
-    {{ end }}
-
-    {{- define "Footer" -}}
-        
-    {{- end }}
-`
+	{{- if not .IsRecovered -}}[报警中] 🔥{{- else -}}[已恢复] ✨{{- end -}}
+	{{- end }}
+	
+	{{- define "TitleColor" -}}
+	{{- if not .IsRecovered -}}red{{- else -}}green{{- end -}}
+	{{- end }}
+	
+	{{ define "SeverityDescription" -}}
+	{{- if eq .Severity "P0" }}紧急
+	{{- else if eq .Severity "P1" }}严重
+	{{- else if eq .Severity "P2" }}提示
+	{{- else }}未知
+	{{- end }}
+	{{ end }}
+	
+	{{ define "Event" -}}
+	{{- if not .IsRecovered -}}
+	🤖 告警类型: {{.RuleName}}
+	🫧 告警指纹: {{.Fingerprint}}
+	📌 告警等级: {{ template "SeverityDescription" . }}
+	🖥 告警主机: {{ .Metric.instance }}
+	🕘 开始时间: {{.FirstTriggerTimeFormat}}
+	👤 值班人员: {{ range .DutyUser -}}
+			   {{.UserName}},
+			   {{- end }}
+	📝 报警事件: {{ range .Rules -}}
+			{{.MetricName}} {{.Operator}} {{.Value}}{{.Unit}}, 
+			{{- end }}
+	{{- else -}}
+	🤖 告警类型: {{.RuleName}}
+	🫧 告警指纹: {{.Fingerprint}}
+	📌 告警等级: {{.Severity}}
+	🖥 告警主机: {{ .Metric.instance }}
+	🕘 开始时间: {{.FirstTriggerTimeFormat}}
+	🕘 恢复时间: {{.RecoverTimeFormat}}
+	👤 值班人员: {{ range .DutyUser -}}
+			   {{.UserName}},
+			   {{- end }}
+	📝 报警事件: {{ range .Rules -}}
+			{{.MetricName}} {{.Operator}} {{.Value}}{{.Unit}}, 
+			{{- end }}
+	{{- end -}}
+	{{ end }}
+	
+	{{- define "Footer" -}}
+	{{- end }}
+	`
 
 	Title := ParserTemplate("Title", alert, templateStr)
 	Event := ParserTemplate("Event", alert, templateStr)

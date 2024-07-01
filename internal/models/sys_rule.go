@@ -7,19 +7,18 @@ type LabelsMap map[string]string
 type NoticeGroup []map[string]string
 
 type AlertRule struct {
-	TenantId             string        `json:"tenantId"`
-	RuleId               string        `json:"ruleId" gorm:"ruleId"`                               //告警规则ID
-	RuleGroupId          string        `json:"ruleGroupId"`                                        //所属告警组
-	DatasourceType       string        `json:"datasourceType"`                                     //告警类型 Prometheus  Log  Apm
-	MetricsParent        string        `json:"metricsParent"`                                      //告警大类
-	MetricsChild         string        `json:"metricsChild"`                                       //告警小类
-	DatasourceIdList     []string      `json:"datasourceId" gorm:"datasourceId;serializer:json"`   //数据源列表: 当前一个告警源对应一个数据源列表
-	RuleName             string        `json:"ruleName"`                                           //规则名称
-	EvalInterval         int64         `json:"evalInterval"`                                       //执行频率
-	RepeatNoticeInterval int64         `json:"repeatNoticeInterval"`                               //重复通知间隔时间
-	Description          string        `json:"description"`                                        //描述信息
-	EffectiveTime        EffectiveTime `json:"effectiveTime" gorm:"effectiveTime;serializer:json"` //告警周期
-	Severity             string        `json:"severity"`                                           //告警程度
+	TenantId             string   `json:"tenantId"`
+	RuleId               string   `json:"ruleId" gorm:"ruleId"`                             //告警规则ID
+	RuleGroupId          string   `json:"ruleGroupId"`                                      //所属告警组
+	DatasourceType       string   `json:"datasourceType"`                                   //告警类型 Prometheus  Log  Apm
+	MetricsParent        string   `json:"metricsParent"`                                    //告警大类
+	MetricsChild         string   `json:"metricsChild"`                                     //告警小类
+	DatasourceIdList     []string `json:"datasourceId" gorm:"datasourceId;serializer:json"` //数据源列表: 当前一个告警源对应一个数据源列表
+	RuleName             string   `json:"ruleName"`                                         //规则名称
+	EvalInterval         int64    `json:"evalInterval"`                                     //执行频率
+	RepeatNoticeInterval int64    `json:"repeatNoticeInterval"`                             //重复通知间隔时间
+	Description          string   `json:"description"`                                      //描述信息
+	Severity             string   `json:"severity"`                                         //告警程度
 	// Prometheus
 	PrometheusConfig PrometheusConfig `json:"prometheusConfig" gorm:"prometheusConfig;serializer:json"` //prometheus相关配置
 
@@ -39,15 +38,9 @@ type AlertRuleQuery struct {
 	DatasourceType   string   `json:"datasourceType" form:"datasourceType"`
 	DatasourceIdList []string `json:"datasourceId" form:"datasourceId"`
 	RuleName         string   `json:"ruleName" form:"ruleName"`
+	NoticeId         string   `json:"noticeId" form:"noticeId"`
 	Enabled          string   `json:"enabled" form:"enabled"`
 	common.PageInfo
-}
-
-// EffectiveTime 生效时间
-type EffectiveTime struct {
-	Week      []string `json:"week"`
-	StartTime int      `json:"startTime"`
-	EndTime   int      `json:"endTime"`
 }
 
 type PrometheusConfig struct {
@@ -60,12 +53,12 @@ type PrometheusConfig struct {
 
 // Rules 告警条件规则
 type Rules struct {
-	TargetMapping    string  ` json:"targetMapping"`   // 告警指标映射
-	TargetExpression string  `json:"targetExpression"` //告警指标表达式
-	MetricName       string  ` json:"metricName"`      //指标名称
+	TargetMapping    string  ` json:"targetMapping"`   // 告警指标映射   "memory_available_bytes,memory_total_bytes"
+	TargetExpression string  `json:"targetExpression"` // 告警指标表达式  "(1- (@[memory_available_bytes]@) / @[memory_total_bytes]@) * 100"
+	MetricName       string  ` json:"metricName"`      // 指标名称
 	Unit             string  ` json:"unit"`            // 告警指标单位
 	Value            float64 ` json:"value"`           // 告警指标值
 	Operator         string  ` json:"operator"`        // 告警操作符
 	Severity         string  ` json:"severity"`        // 告警严重程度
-	Description      string  ` json:"description"`     // 描述
+	Description      string  ` json:"description"`     // 描述 "4_内存使用率"
 }

@@ -13,7 +13,10 @@ type RuleGroupApi struct{}
 
 func (RuleGroupApi) Create(ctx *gin.Context) {
 	r := new(models.RuleGroups)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -26,7 +29,10 @@ func (RuleGroupApi) Create(ctx *gin.Context) {
 
 func (RuleGroupApi) Update(ctx *gin.Context) {
 	r := new(models.RuleGroups)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -55,7 +61,10 @@ func (RuleGroupApi) List(ctx *gin.Context) {
 }
 func (RuleGroupApi) Delete(ctx *gin.Context) {
 	r := new(models.RuleGroupQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

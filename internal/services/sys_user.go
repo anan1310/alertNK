@@ -9,7 +9,7 @@ type sysUserService struct {
 }
 
 type interSysUserService interface {
-	List() (interface{}, interface{})
+	List(userIds []int) (interface{}, interface{})
 }
 
 func newInterUserService(ctx *ctx.Context) interSysUserService {
@@ -18,8 +18,8 @@ func newInterUserService(ctx *ctx.Context) interSysUserService {
 	}
 }
 
-func (us sysUserService) List() (interface{}, interface{}) {
-	data, err := us.ctx.DB.SysUser().List()
+func (us sysUserService) List(userIds []int) (interface{}, interface{}) {
+	data, err := us.ctx.DB.SysUser().List(userIds)
 	if err != nil {
 		return nil, err
 	}

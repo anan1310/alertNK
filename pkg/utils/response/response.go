@@ -65,8 +65,10 @@ func Service(ctx *gin.Context, fu func() (interface{}, interface{})) {
 		Fail(ctx, err.(error).Error(), "failed")
 		ctx.Abort()
 		return
+	} else {
+		Success(ctx, "success", data)
 	}
-	Success(ctx, "success", data)
+
 }
 
 func ServiceTotal(ctx *gin.Context, fu func() (interface{}, interface{}, interface{})) {
@@ -75,24 +77,27 @@ func ServiceTotal(ctx *gin.Context, fu func() (interface{}, interface{}, interfa
 		Fail(ctx, err.(error).Error(), "failed")
 		ctx.Abort()
 		return
+	} else {
+		SuccessTotal(ctx, "success", total.(int64), data)
 	}
-	SuccessTotal(ctx, "success", total.(int64), data)
 }
 
-func BindJson(ctx *gin.Context, req interface{}) {
+func BindJson(ctx *gin.Context, req interface{}) error {
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		Fail(ctx, err.Error(), "failed")
 		ctx.Abort()
-		return
+		return err
 	}
+	return nil
 }
 
-func BindQuery(ctx *gin.Context, req interface{}) {
+func BindQuery(ctx *gin.Context, req interface{}) error {
 	err := ctx.ShouldBindQuery(req)
 	if err != nil {
 		Fail(ctx, err.Error(), "failed")
 		ctx.Abort()
-		return
+		return err
 	}
+	return nil
 }

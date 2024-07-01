@@ -13,7 +13,10 @@ type DutyManagerApi struct{}
 
 func (DutyManagerApi) Create(ctx *gin.Context) {
 	r := new(models.DutyManagement)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -44,7 +47,10 @@ func (DutyManagerApi) List(ctx *gin.Context) {
 
 func (DutyManagerApi) Update(ctx *gin.Context) {
 	r := new(models.DutyManagement)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -57,7 +63,10 @@ func (DutyManagerApi) Update(ctx *gin.Context) {
 func (DutyManagerApi) Delete(ctx *gin.Context) {
 
 	r := new(models.DutyManagementQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

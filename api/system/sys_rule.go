@@ -13,7 +13,10 @@ type RuleApi struct{}
 
 func (RuleApi) Create(ctx *gin.Context) {
 	r := new(models.AlertRule)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -25,7 +28,10 @@ func (RuleApi) Create(ctx *gin.Context) {
 
 func (RuleApi) Update(ctx *gin.Context) {
 	r := new(models.AlertRule)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -56,7 +62,10 @@ func (RuleApi) List(ctx *gin.Context) {
 func (RuleApi) Delete(ctx *gin.Context) {
 
 	r := new(models.AlertRuleQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

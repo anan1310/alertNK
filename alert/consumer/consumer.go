@@ -5,11 +5,11 @@ import (
 	"alarm_collector/alert/sender"
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
+	"alarm_collector/internal/models/system"
 	"alarm_collector/pkg/ctx"
 	"alarm_collector/pkg/utils/common"
 	"alarm_collector/pkg/utils/hash"
 	"alarm_collector/pkg/utils/templates"
-	"fmt"
 	"time"
 
 	"sync"
@@ -166,21 +166,23 @@ func (ec *Consume) fireAlertEvent(alertsMap map[string][]models.AlertCurEvent) {
 
 	for _, alerts := range alertsMap {
 		for _, alert := range alerts {
+			alertCopy := alert
 			wg.Add(1)
-			go func(alert models.AlertCurEvent) {
+			go func(models.AlertCurEvent) {
 				defer wg.Done()
-				ec.addAlertToGroup(alert)
-				if alert.IsRecovered {
-					ec.removeAlertFromCache(alert)
+				ec.addAlertToGroup(alertCopy)
+				if alertCopy.IsRecovered {
+					ec.removeAlertFromCache(alertCopy)
 					//记录历史告警
-					err := process.RecordAlertHisEvent(ec.ctx, alert)
+
+					err := process.RecordAlertHisEvent(ec.ctx, alertCopy)
 					if err != nil {
 						global.Logger.Sugar().Error(err.Error())
 						return
 					}
 
 				}
-			}(alert)
+			}(alertCopy)
 		}
 	}
 
@@ -267,58 +269,57 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 	}
 
 	var (
-		content  = new(common.MyString)
-		alertOne models.AlertCurEvent
-		curTime  = time.Now().Unix()
+		content = new(common.MyString)
+		curTime = time.Now().Unix()
 	)
 
-	if len(alerts) > 1 {
-		content.A(fmt.Sprintf("聚合 %d 条告警\n", len(alerts)))
-		for _, alert := range alerts {
-			content.A(templates.DetailTemplate(alert)).A("\n")
-		}
-	} else {
+	//通知模版 目前一条告警规则只能匹配一条告警模版
+	noticeData, _ := ec.ctx.DB.Notice().Get(models.NoticeQuery{
+		TenantId: alerts[0].TenantId,
+		ID:       alerts[0].NoticeId,
+	})
 
-		content.A(templates.DetailTemplate(alerts[0])).A("\n")
+	if common.IsEmptyStr(noticeData.Name) {
+		//通知模版不存在 返回错误信息
+		return
 	}
-
-	// 告警聚合,减少告警噪音， 每组告警取第一位的告警数据
-	alertOne = alerts[0]
-	alerts[0].Annotations = content.Str()
-
-	noticeId := process.GetNoticeGroupId(alertOne)
-
-	r := models.NoticeQuery{
-		TenantId: alertOne.TenantId,
-		ID:       noticeId,
-	}
-	//告警通知模版
-	noticeData, _ := ec.ctx.DB.Notice().Get(r)
-
-	var wg sync.WaitGroup
 
 	for i := range alerts {
-		alerts[i].DutyUser = process.GetDutyUser(ec.ctx, noticeData)
-	}
-
-	for _, alert := range alerts {
-		// 如果告警没有恢复，更新缓冲信息
-		if !alert.IsRecovered {
-			//保证每个协程都是独立的副本
-			alertCopy := alert
-			wg.Add(1)
-			go func(alert models.AlertCurEvent) {
-				defer wg.Done()
-				alert.LastSendTime = curTime
-				ec.ctx.Redis.Event().SetCache("Firing", alert, 0)
-			}(alertCopy)
+		//每次都需要情况
+		var fetchedUsers []system.SysUser
+		switch noticeData.UserNotices.ReceiverType {
+		case "User":
+			fetchedUsers = process.GetAlertUsers(ec.ctx, noticeData)
+		case "Duty":
+			//获取值班表的用户
+			fetchedUser := process.GetDutyUser(ec.ctx, noticeData)
+			fetchedUsers = append(fetchedUsers, *fetchedUser)
 		}
-	}
+		//更新告警人
+		alerts[i].DutyUser = fetchedUsers
+		//告警详情组合
+		content.A(templates.DetailTemplate(alerts[i])).A("\n")
 
+	}
+	// 告警聚合,减少告警噪音， 每组告警取第一位的告警数据
+	alerts[0].Annotations = content.Str()
+
+	var wg sync.WaitGroup
+	for i := range alerts {
+		wg.Add(1)
+		n := i
+		go func(int) {
+			defer wg.Done()
+			if !alerts[n].IsRecovered {
+				alerts[n].LastSendTime = curTime
+				ec.ctx.Redis.Event().SetCache("Firing", alerts[n], 0)
+			}
+
+		}(n)
+	}
 	wg.Wait()
-	//聚合第一条告警信息通知人
-	//alertOne.DutyUser = alerts[0].DutyUser
-	// 开始告警 指定告警方式
+
+	// 相同告警规则聚合到第一条告警
 	err := sender.Sender(ec.ctx, alerts, noticeData)
 	if err != nil {
 		global.Logger.Sugar().Errorf(err.Error())

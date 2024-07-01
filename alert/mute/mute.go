@@ -7,7 +7,11 @@ import (
 	"time"
 )
 
-func IsMuted(ctx *ctx.Context, alert *models.AlertCurEvent) bool {
+func IsMuted(ctx *ctx.Context, alert *models.AlertCurEvent, notice models.AlertNotice) bool {
+	//判断是否开启通知 勾选之后才会通知
+	if enable := IsNotificationEnabled(alert, notice); enable {
+		return true
+	}
 	// 判断静默
 	var as models.AlertSilences
 	ctx.DB.DB().Model(models.AlertSilences{}).Where("fingerprint = ?", alert.Fingerprint).First(&as)
@@ -28,12 +32,12 @@ func IsMuted(ctx *ctx.Context, alert *models.AlertCurEvent) bool {
 		}
 	}
 
-	return InTheEffectiveTime(alert)
+	return InTheEffectiveTime(notice)
 }
 
 // InTheEffectiveTime 判断生效时间
-func InTheEffectiveTime(alert *models.AlertCurEvent) bool {
-	if len(alert.EffectiveTime.Week) <= 0 {
+func InTheEffectiveTime(notice models.AlertNotice) bool {
+	if len(notice.UserNotices.Week) <= 0 {
 		return false
 	}
 
@@ -43,7 +47,7 @@ func InTheEffectiveTime(alert *models.AlertCurEvent) bool {
 	)
 
 	cwd := currentWeekday(currentTime)
-	for _, wd := range alert.EffectiveTime.Week {
+	for _, wd := range notice.UserNotices.Week {
 		if cwd != wd {
 			continue
 		}
@@ -55,7 +59,7 @@ func InTheEffectiveTime(alert *models.AlertCurEvent) bool {
 	}
 
 	cts := currentTimeSeconds(currentTime)
-	if cts < alert.EffectiveTime.StartTime || cts > alert.EffectiveTime.EndTime {
+	if cts < notice.UserNotices.StartTime || cts > notice.UserNotices.StartTime {
 		return true
 	}
 
@@ -79,4 +83,18 @@ func currentWeekday(ct time.Time) string {
 func currentTimeSeconds(ct time.Time) int {
 	cs := ct.Hour()*3600 + ct.Minute()*60
 	return cs
+}
+
+func IsNotificationEnabled(alert *models.AlertCurEvent, notice models.AlertNotice) bool {
+	switch alert.IsRecovered {
+	case true:
+		if !*notice.EnabledRecoverNotice {
+			return false
+		}
+	case false:
+		if !*notice.EnabledAlertNotice {
+			return false
+		}
+	}
+	return true
 }

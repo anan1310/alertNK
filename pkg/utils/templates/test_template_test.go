@@ -39,8 +39,7 @@ func TestName(t *testing.T) {
 		LastSendTime:           1718258289,
 		RecoverTime:            0,
 		RecoverTimeFormat:      "",
-		DutyUser:               system.SysUser{UserName: "安志杰"},
-		EffectiveTime:          models.EffectiveTime{},
+		DutyUser:               []system.SysUser{{UserName: "安志杰"}},
 		Rules: []models.Rules{
 			{
 

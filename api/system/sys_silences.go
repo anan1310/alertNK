@@ -13,7 +13,10 @@ type SilencesApi struct{}
 
 func (SilencesApi) Create(ctx *gin.Context) {
 	r := new(models.AlertSilences)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -26,7 +29,10 @@ func (SilencesApi) Create(ctx *gin.Context) {
 
 func (SilencesApi) Update(ctx *gin.Context) {
 	r := new(models.AlertSilences)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -39,7 +45,10 @@ func (SilencesApi) Update(ctx *gin.Context) {
 
 func (SilencesApi) Delete(ctx *gin.Context) {
 	r := new(models.AlertSilenceQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

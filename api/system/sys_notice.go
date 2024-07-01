@@ -15,8 +15,10 @@ func (NoticeApi) List(ctx *gin.Context) {
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	page := common.ToInt(ctx.Query("page"))
 	pageSize := common.ToInt(ctx.Query("pageSize"))
+	name := ctx.Query("name")
 	NoticeQuery := &models.NoticeQuery{
 		TenantId: tid.(string),
+		Name:     name,
 		PageInfo: common.PageInfo{
 			Page:     page,
 			PageSize: pageSize,
@@ -30,7 +32,10 @@ func (NoticeApi) List(ctx *gin.Context) {
 
 func (NoticeApi) Create(ctx *gin.Context) {
 	r := new(models.AlertNotice)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
@@ -43,7 +48,10 @@ func (NoticeApi) Create(ctx *gin.Context) {
 
 func (NoticeApi) Update(ctx *gin.Context) {
 	r := new(models.AlertNotice)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 	//存到请求头中 使用context进行一个管理
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -55,7 +63,10 @@ func (NoticeApi) Update(ctx *gin.Context) {
 
 func (NoticeApi) Delete(ctx *gin.Context) {
 	r := new(models.NoticeQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -67,7 +78,10 @@ func (NoticeApi) Delete(ctx *gin.Context) {
 
 func (NoticeApi) Get(ctx *gin.Context) {
 	r := new(models.NoticeQuery)
-	response.BindQuery(ctx, r)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

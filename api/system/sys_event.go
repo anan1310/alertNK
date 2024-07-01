@@ -13,7 +13,10 @@ type AlertEventApi struct{}
 func (AlertEventApi) ListCurrentEvent(ctx *gin.Context) {
 	r := new(models.AlertCurEventQuery)
 
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)
@@ -25,7 +28,10 @@ func (AlertEventApi) ListCurrentEvent(ctx *gin.Context) {
 
 func (AlertEventApi) ListHistoryEvent(ctx *gin.Context) {
 	r := new(models.AlertHisEventQuery)
-	response.BindJson(ctx, r)
+	err := response.BindJson(ctx, r)
+	if err != nil {
+		return
+	}
 
 	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
 	r.TenantId = tid.(string)

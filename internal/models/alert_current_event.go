@@ -34,8 +34,7 @@ type AlertCurEvent struct {
 	LastSendTime           int64                  `json:"last_send_time" gorm:"-"` // 上一次发送时间
 	RecoverTime            int64                  `json:"recover_time" gorm:"-"`   // 恢复时间
 	RecoverTimeFormat      string                 `json:"recover_time_format" gorm:"-"`
-	DutyUser               system.SysUser         `json:"duty_user" gorm:"-"`
-	EffectiveTime          EffectiveTime          `json:"effectiveTime" gorm:"effectiveTime;serializer:json"`
+	DutyUser               []system.SysUser       `json:"duty_user" gorm:"-"`
 	Rules                  []Rules                `json:"rules" gorm:"rules;serializer:json"`
 }
 

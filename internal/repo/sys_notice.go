@@ -2,6 +2,7 @@ package repo
 
 import (
 	"alarm_collector/internal/models"
+	"alarm_collector/pkg/utils/common"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -46,6 +47,9 @@ func (nr NoticeRepo) List(req models.NoticeQuery) ([]models.AlertNotice, int64, 
 	offset := req.PageSize * (req.Page - 1)
 
 	db.Where("tenant_id = ?", req.TenantId)
+	if !common.IsEmptyStr(req.Name) {
+		db = db.Where("name LIKE ?", "%"+req.Name+"%")
+	}
 	//查询总条数
 	db.Count(&total)
 	if err := db.Limit(limit).Offset(offset).Find(&alertNoticeObject).Error; err != nil {

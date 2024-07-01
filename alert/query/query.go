@@ -101,8 +101,12 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	for i, r := range rules {
 		switch rule.PrometheusConfig.IsUnionRule {
 		case 0:
+			//判断是否有计算表达式 如果有的话 需要提取出来
 			//system_cpu_usage < 0.1,||,load1 > 0.2
 			alarmRule.A(r.TargetMapping + " " + r.Operator + " " + common.StrVal(r.Value) + " " + r.Severity)
+			if !common.IsEmptyStr(r.TargetExpression) {
+
+			}
 			//拼接字段
 			targetMapping.A(r.TargetMapping)
 			if i < size-1 {
