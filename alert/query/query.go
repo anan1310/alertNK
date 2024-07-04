@@ -6,7 +6,7 @@ import (
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
-	"alarm_collector/pkg/utils/common"
+	"alarm_collector/pkg/utils/templates"
 	"time"
 )
 
@@ -63,7 +63,8 @@ func (rq *RuleQuery) alertRecover(rule models.AlertRule, curKeys []string) {
 		event.IsRecovered = true
 		event.RecoverTime = curTime
 		event.LastSendTime = 0
-
+		//处理告警内容
+		event.Annotations = templates.DetailTemplate(event)
 		rq.ctx.Redis.Event().SetCache("Firing", event, 0)
 
 		// 触发恢复删除带恢复中的 key
@@ -81,12 +82,6 @@ func (rq *RuleQuery) alertRecover(rule models.AlertRule, curKeys []string) {
 func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	//聚合告警规则
 	var (
-		alarmRule     = new(common.MyString)
-		rules         = rule.PrometheusConfig.Rules
-		targetMapping = new(common.MyString)
-
-		alertSourceMap = rule.PrometheusConfig.AlertSource
-
 		curFiringKeys  = &[]string{}
 		curPendingKeys = &[]string{}
 	)
@@ -97,59 +92,24 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 		go process.GcRecoverWaitCache(rule, *curFiringKeys)
 	}()
 
-	size := len(rules)
-	for i, r := range rules {
-		switch rule.PrometheusConfig.IsUnionRule {
-		case 0:
-			//判断是否有计算表达式 如果有的话 需要提取出来
-			//system_cpu_usage < 0.1,||,load1 > 0.2
-			alarmRule.A(r.TargetMapping + " " + r.Operator + " " + common.StrVal(r.Value) + " " + r.Severity)
-			if !common.IsEmptyStr(r.TargetExpression) {
-
-			}
-			//拼接字段
-			targetMapping.A(r.TargetMapping)
-			if i < size-1 {
-				targetMapping.A(",")
-				alarmRule.A(",||,")
-			}
-		case 1:
-			//system_cpu_usage < 0.1,&&,load1 > 0.2
-			alarmRule.A(r.TargetMapping + " " + r.Operator + " " + common.StrVal(r.Value) + " " + r.Severity)
-			//拼接字段
-			targetMapping.A(r.TargetMapping)
-			if i < size-1 {
-				targetMapping.A(",")
-				alarmRule.A(",&&,")
-			}
-		case 2:
-
-		}
-	}
-	//获取数据源的值  如果达到告警的阈值 那么就写入redis缓冲中
-	s := models.PrometheusDataSourceQuery{
-		MetricType:    alertSourceMap["metricType"],
-		MetricName:    alertSourceMap["metricName"],
-		MetricHost:    alertSourceMap["metricHost"],
-		Pid:           alertSourceMap["pid"],
-		TargetMapping: targetMapping.Str(),
-	}
-	//获取告警源
-	alertSource, err := rq.ctx.CK.PrometheusDataSource().Get(s)
+	//获取告警源数据
+	alertSource, alarmRule, err := rq.handleAlertSource(rule)
 	if err != nil {
 		return
 	}
 	global.Logger.Sugar().Info("告警源前数据-->", alertSource)
-	err, conditionStack, severity := ParsePromRule(alarmRule.Str(), alertSource)
+	conditionStack, severity, err := evaluateRPN(alarmRule, alertSource)
 	global.Logger.Sugar().Info("告警源后数据-->", alertSource)
 	if err != nil || len(alertSource) == 0 {
+		global.Logger.Sugar().Error("告警规则解析错误-->", err)
 		return
 	}
 
 	// 如果最终条件为真，推送告警到redis中
-	if len(conditionStack) == 1 && conditionStack[0] {
+	if conditionStack {
 		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
 		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
 	}
+	4
 
 }

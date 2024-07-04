@@ -73,3 +73,19 @@ func (RuleApi) Delete(ctx *gin.Context) {
 		return services.RuleService.Delete(r)
 	})
 }
+
+func (RuleApi) Get(ctx *gin.Context) {
+	r := new(models.AlertRuleQuery)
+	err := response.BindQuery(ctx, r)
+	if err != nil {
+		return
+	}
+
+	tid, _ := ctx.Get(middleware.TenantIDHeaderKey)
+	r.TenantId = tid.(string)
+
+	response.Service(ctx, func() (interface{}, interface{}) {
+		return services.RuleService.Get(r)
+	})
+
+}

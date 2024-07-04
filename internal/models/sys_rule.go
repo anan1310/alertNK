@@ -53,12 +53,17 @@ type PrometheusConfig struct {
 
 // Rules 告警条件规则
 type Rules struct {
-	TargetMapping    string  ` json:"targetMapping"`   // 告警指标映射   "memory_available_bytes,memory_total_bytes"
+	TargetKey        string  `json:"targetKey"`        //唯一标识
+	TargetMapping    string  ` json:"targetMapping"`   // 告警指标映射 “memory_available_bytes,memory_total_bytes”
 	TargetExpression string  `json:"targetExpression"` // 告警指标表达式  "(1- (@[memory_available_bytes]@) / @[memory_total_bytes]@) * 100"
 	MetricName       string  ` json:"metricName"`      // 指标名称
-	Unit             string  ` json:"unit"`            // 告警指标单位
-	Value            float64 ` json:"value"`           // 告警指标值
+	FromUnit         string  `json:"fromUnit"`         //告警原单位
+	ToUnit           string  `json:"toUnit"`           //告警目标单位
+	Precision        string  `json:"precision"`        //保留精度（默认2位）
+	Value            float64 ` json:"value"`           // 告警阈值
+	ValueMax         float64 `json:"valueMax"`         //最大值
+	ValueMin         float64 `json:"valueMin"`         //最小值
 	Operator         string  ` json:"operator"`        // 告警操作符
 	Severity         string  ` json:"severity"`        // 告警严重程度
-	Description      string  ` json:"description"`     // 描述 "4_内存使用率"
+	Description      string  ` json:"description"`     // 描述 "内存使用率"
 }

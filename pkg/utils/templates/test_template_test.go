@@ -46,7 +46,7 @@ func TestName(t *testing.T) {
 				TargetMapping:    "load1",
 				TargetExpression: "",
 				MetricName:       "1分钟平均负载",
-				Unit:             "",
+				ToUnit:           "",
 				Value:            0.02,
 				Operator:         ">",
 				Severity:         "一般",
@@ -81,7 +81,7 @@ func TestName(t *testing.T) {
 			**🕘 开始时间:** {{.FirstTriggerTimeFormat}}
 			**👤 值班人员:** {{.DutyUser.UserName}}
 			**📝 报警事件:** {{ range .Rules -}}
-							  	[{{ .Severity }}] {{ .MetricName }} {{ .Operator }} {{ .Value }}{{ .Unit }}，统计粒度{{ .TargetExpression }}，连续1次满足条件则每1小时告警一次
+							  	[{{ .Severity }}] {{ .MetricName }} {{ .Operator }} {{ .Value }}{{ .ToUnit }}，统计粒度{{ .TargetExpression }}，连续1次满足条件则每1小时告警一次
 							{{ end -}}
 		{{- else -}}
 			**🤖 报警类型:** {{.RuleName}}

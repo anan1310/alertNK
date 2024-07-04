@@ -38,7 +38,7 @@ func DetailTemplate(alert models.AlertCurEvent) string {
 		   {{.UserName}},
 		   {{- end }}
 📝 报警事件: {{ range .Rules -}}
-		{{.MetricName}} {{.Operator}} {{.Value}}{{.Unit}},
+		{{.MetricName}} {{.Operator}} {{.Value}}{{.ToUnit}},
 		{{- end }}
 {{- else -}}
 🤖 告警类型: {{.RuleName}} 
@@ -51,7 +51,7 @@ func DetailTemplate(alert models.AlertCurEvent) string {
 		   {{.UserName}},
 		   {{- end }}
 📝 报警事件: {{ range .Rules -}} 
-		{{.MetricName}} {{.Operator}} {{.Value}}{{.Unit}},
+		{{.MetricName}} {{.Operator}} {{.Value}}{{.ToUnit}},
 		{{- end }}
 {{- end -}}
 {{- end -}}

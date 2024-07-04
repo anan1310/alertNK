@@ -57,6 +57,10 @@ func (e eventService) ListCurrentEvent(req interface{}) (interface{}, interface{
 		if err != nil {
 			return nil, 0, err
 		}
+		//告警详情为空或者已恢复不记录
+		if common.IsEmptyStr(data.Annotations) && strings.Contains(data.Annotations, "已恢复") {
+			continue
+		}
 		dataList = append(dataList, data)
 	}
 

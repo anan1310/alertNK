@@ -215,20 +215,23 @@ func RecordAlertHisEvent(ctx *ctx.Context, alert models.AlertCurEvent) error {
 	*/
 	hisData := models.AlertHisEvent{
 		TenantId:         alert.TenantId,
-		DatasourceType:   alert.DatasourceType,
+		DatasourceType:   alert.DatasourceType, //监控数据源
+		RuleGroupId:      alert.RuleGroupId,    //告警策略组
 		DatasourceId:     alert.DatasourceId,
-		Fingerprint:      alert.Fingerprint,
-		RuleId:           alert.RuleId,
-		RuleName:         alert.RuleName,
-		Severity:         alert.Severity,
-		Metric:           alert.Metric,
+		Fingerprint:      alert.Fingerprint, //告警指纹
+		RuleId:           alert.RuleId,      //告警策略ID
+		RuleName:         alert.RuleName,    //告警策略
+		Severity:         alert.Severity,    //告警级别
+		Metric:           alert.Metric,      //告警主机
 		EvalInterval:     alert.EvalInterval,
-		Annotations:      strings.Replace(alert.Annotations, "[报警中] 🔥", "[已恢复] ✨", -1),
 		IsRecovered:      true,
-		FirstTriggerTime: alert.FirstTriggerTime,
+		FirstTriggerTime: alert.FirstTriggerTime, //告警时间
 		LastEvalTime:     alert.LastEvalTime,
 		LastSendTime:     alert.LastSendTime,
-		RecoverTime:      alert.RecoverTime,
+		RecoverTime:      alert.RecoverTime,                          //告警恢复时间
+		Duration:         alert.RecoverTime - alert.FirstTriggerTime, //告警持续时间
+		DutyUser:         alert.DutyUser,                             //告警对象
+		Rules:            alert.Rules,                                //告警状态
 	}
 
 	err := ctx.DB.HistoryEvent().CreateHistoryEvent(hisData)
@@ -254,6 +257,9 @@ func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {
 		event.LastSendTime = resFiring.LastSendTime
 		//告警详情
 		event.Annotations = resFiring.Annotations
+		event.RuleGroupId = resFiring.RuleGroupId
+		event.Rules = resFiring.Rules
+		event.DutyUser = resFiring.DutyUser
 	} else {
 		event.FirstTriggerTime = ctx.Redis.Event().GetFirstTime(pendingKey)
 		event.LastEvalTime = ctx.Redis.Event().GetLastEvalTime(pendingKey)
@@ -261,7 +267,7 @@ func SaveEventCache(ctx *ctx.Context, event models.AlertCurEvent) {
 		ctx.Redis.Event().SetCache("Pending", event, 0)
 	}
 
-	// 初次告警需要比对持续时间
+	// 初次告警需要比对持续时间：判断事件的持续时间是否已经达到预设的阈值
 	if resFiring.LastSendTime == 0 {
 		if event.LastEvalTime-event.FirstTriggerTime < event.ForDuration {
 			return

@@ -1,10 +1,14 @@
 package models
 
-import "alarm_collector/pkg/utils/common"
+import (
+	"alarm_collector/internal/models/system"
+	"alarm_collector/pkg/utils/common"
+)
 
 // AlertHisEvent 历史告警
 type AlertHisEvent struct {
 	TenantId         string                 `json:"tenantId"`
+	RuleGroupId      string                 `json:"rule_group_id"`
 	DatasourceId     string                 `json:"datasource_id" gorm:"datasource_id"`
 	DatasourceType   string                 `json:"datasource_type"`
 	Fingerprint      string                 `json:"fingerprint"`
@@ -20,6 +24,8 @@ type AlertHisEvent struct {
 	LastSendTime     int64                  `json:"last_send_time"`        // 最近发送时间
 	RecoverTime      int64                  `json:"recover_time"`          // 恢复时间
 	Duration         int64                  `json:"duration"`              //告警持续时间
+	Rules            []Rules                `json:"rules" gorm:"rules;serializer:json"`
+	DutyUser         []system.SysUser       `json:"duty_user" gorm:"duty_user;serializer:json"`
 }
 
 func (AlertHisEvent) TableName() string {

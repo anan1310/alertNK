@@ -47,7 +47,7 @@ func dingDingTemplate(alert models.AlertCurEvent) string {
             **🕘 开始时间:** ${first_trigger_time_format}<br>
             **👤 值班人员:** ${duty_user.user_name}<br>
             **📝 报警事件:** {{ range .Rules -}}
-		              {{ .MetricName }} {{ .Operator }} {{ .Value }}{{ .Unit }}, <br>
+		              {{ .MetricName }} {{ .Operator }} {{ .Value }}{{ .ToUnit }}, <br>
 		          {{- end }}
         {{- else -}}
             **🤖 告警类型:** ${rule_name}<br>

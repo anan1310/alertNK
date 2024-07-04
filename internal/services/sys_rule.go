@@ -17,6 +17,7 @@ type interRuleService interface {
 	Update(r interface{}) (interface{}, interface{})
 	Delete(r interface{}) (interface{}, interface{})
 	ListRule(r interface{}) (interface{}, interface{}, interface{})
+	Get(req interface{}) (interface{}, interface{})
 }
 
 func newInterRuleService(ctx *ctx.Context) interRuleService {
@@ -125,4 +126,13 @@ func (rs *ruleService) ListRule(r interface{}) (interface{}, interface{}, interf
 		return nil, 0, err
 	}
 	return data, total, nil
+}
+
+func (rs *ruleService) Get(r interface{}) (interface{}, interface{}) {
+	rule := r.(*models.AlertRuleQuery)
+	data, err := rs.ctx.DB.Rule().Get(*rule)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

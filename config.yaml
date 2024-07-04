@@ -19,7 +19,7 @@ mysql:
   password: MySQL%5.7
   maxIdleConns: 10
   maxOpenConns: 100
-  config: charset=utf8&parseTime=True&loc=Local
+  config: charset=utf8mb4&parseTime=True&loc=Local
 
 clickhouse:
   host: 123.56.214.170:9000

@@ -15,6 +15,7 @@ type AlertCurEvent struct {
 	TenantId               string                 `json:"tenantId"`
 	RuleId                 string                 `json:"rule_id"`
 	RuleName               string                 `json:"rule_name"`
+	RuleGroupId            string                 `json:"rule_group_id"`
 	DatasourceType         string                 `json:"datasource_type"`
 	DatasourceId           string                 `json:"datasource_id" gorm:"datasource_id"`
 	Fingerprint            string                 `json:"fingerprint"`

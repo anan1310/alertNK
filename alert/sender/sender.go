@@ -2,7 +2,6 @@ package sender
 
 import (
 	"alarm_collector/alert/mute"
-	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/ctx"
 	"alarm_collector/pkg/utils/templates"
@@ -18,7 +17,7 @@ func Sender(ctx *ctx.Context, alerts []models.AlertCurEvent, notice models.Alert
 	if ok {
 		return nil
 	}
-	global.Logger.Sugar().Info("开始告警了")
+
 	//获取告警信息
 	interTemplate := templates.NewTemplate(alerts, notice)
 	wg.Add(len(notice.UserNotices.NoticeWay))

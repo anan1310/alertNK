@@ -17,7 +17,7 @@ func CalIndicatorValue(ctx *ctx.Context, curFiringKeys, curPendingKeys *[]string
 
 	//触发的告警规则
 	for _, rules := range rule.PrometheusConfig.Rules {
-		if _, ok := metricMap[rules.TargetMapping]; ok {
+		if _, ok := metricMap[rules.TargetKey]; ok {
 			event.Rules = append(event.Rules, rules)
 		}
 	}
