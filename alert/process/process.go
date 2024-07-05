@@ -169,6 +169,7 @@ func ParserDefaultEvent(rule models.AlertRule) models.AlertCurEvent {
 		DatasourceType:       rule.DatasourceType,
 		RuleId:               rule.RuleId,
 		RuleName:             rule.RuleName,
+		RuleGroupId:          rule.RuleGroupId,
 		EvalInterval:         rule.EvalInterval,
 		ForDuration:          rule.PrometheusConfig.ForDuration,
 		NoticeId:             rule.NoticeId,

@@ -110,6 +110,5 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
 		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
 	}
-	4
 
 }

@@ -312,6 +312,7 @@ func (ec *Consume) handleAlert(alerts []models.AlertCurEvent) {
 			defer wg.Done()
 			if !alerts[n].IsRecovered {
 				alerts[n].LastSendTime = curTime
+				alerts[n].Duration = curTime - alerts[n].FirstTriggerTime
 				ec.ctx.Redis.Event().SetCache("Firing", alerts[n], 0)
 			}
 
