@@ -4,6 +4,7 @@ import (
 	"alarm_collector/global"
 	"alarm_collector/internal/models"
 	"alarm_collector/pkg/utils/common"
+	"errors"
 	"gopkg.in/gomail.v2"
 )
 
@@ -31,7 +32,13 @@ func (t Template) SendAlertEmail() error {
 	user := t.alerts[0].DutyUser
 	var to []string
 	for _, u := range user {
+		if u.EmailStatus == "0" {
+			continue
+		}
 		to = append(to, u.Email)
+	}
+	if len(to) == 0 {
+		return errors.New("no email address")
 	}
 	// 创建新的邮件消息
 	m := gomail.NewMessage()

@@ -6,14 +6,16 @@ import (
 
 // SysUser 用户表
 type SysUser struct {
-	UserID      int64  `json:"user_id"`                                // 用户ID
-	DeptID      *int64 `json:"dept_id,omitempty"`                      // 部门ID
-	UserName    string `json:"user_name"`                              // 用户账号
-	NickName    string `json:"nick_name"`                              // 用户昵称
-	UserType    string `json:"user_type,omitempty"`                    // 用户类型（00系统用户）
-	Email       string `json:"email,omitempty"`                        // 用户邮箱
-	PhoneNumber string `json:"phone_number" gorm:"column:phonenumber"` // 手机号码
-	Sex         string `json:"sex,omitempty"`                          // 用户性别（0男 1女 2未知）
+	UserID      int64  `json:"user_id"`                                 // 用户ID
+	DeptID      *int64 `json:"dept_id,omitempty"`                       // 部门ID
+	UserName    string `json:"user_name"`                               // 用户账号
+	NickName    string `json:"nick_name"`                               // 用户昵称
+	UserType    string `json:"user_type,omitempty"`                     // 用户类型（00系统用户）
+	Email       string `json:"email,omitempty"`                         // 用户邮箱
+	PhoneNumber string `json:"phone_number" gorm:"column:phonenumber"`  // 手机号码
+	EmailStatus string `json:"email_status" gorm:"column:email_status"` //邮箱状态
+	SmsStatus   string `json:"sms_status" gorm:"column:sms_status"`     //手机号状态
+	Sex         string `json:"sex,omitempty"`                           // 用户性别（0男 1女 2未知）
 	//Avatar      string `json:"avatar,omitempty"`               // 头像地址
 	//Password    string     `json:"password,omitempty"`              // 密码
 	Status     string     `json:"status,omitempty"`      // 帐号状态（0正常 1停用）

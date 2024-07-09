@@ -31,6 +31,9 @@ func (t Template) SendAlertSMS() error {
 
 	var phoneNumbers []string
 	for _, u := range t.alerts[0].DutyUser {
+		if u.SmsStatus == "0" {
+			continue
+		}
 		phoneNumbers = append(phoneNumbers, u.PhoneNumber)
 	}
 	phoneNumber := strings.Join(phoneNumbers, ",")
