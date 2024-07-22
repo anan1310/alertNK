@@ -7,6 +7,7 @@ import (
 	"alarm_collector/internal/cache"
 	"alarm_collector/internal/ck"
 	"alarm_collector/internal/repo"
+	"alarm_collector/internal/resource"
 	"alarm_collector/internal/services"
 	"alarm_collector/pkg/ctx"
 	"context"
@@ -30,6 +31,6 @@ func InitBasic() {
 	// 启用告警评估协程
 	alert.Initialize(newContext)
 	//  初始化监控分析数据 (统计协程数)
-	InitResource(newContext)
+	resource.InitResource(newContext)
 
 }

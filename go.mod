@@ -62,6 +62,7 @@ require (
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/rs/xid v1.5.0
 	github.com/tealeg/xlsx/v3 v3.3.7
 	github.com/xuri/excelize/v2 v2.8.1

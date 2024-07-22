@@ -1,4 +1,4 @@
-package initialize
+package resource
 
 import (
 	"alarm_collector/global"

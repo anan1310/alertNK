@@ -25,6 +25,9 @@ type (
 )
 
 func NewMySQLRepoEntry() InterEntryRepo {
+	//if db == nil {
+	//	db = init_database.Gorm("mysql")
+	//}
 	db := init_database.Gorm("mysql")
 	g := NewInterGormDBCli(db)
 	return &entryRepo{

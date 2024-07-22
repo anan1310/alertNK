@@ -101,3 +101,8 @@ func BindQuery(ctx *gin.Context, req interface{}) error {
 	}
 	return nil
 }
+
+func TokenFail(ctx *gin.Context) {
+	code := 401
+	returnJson(ctx, code, code, "鉴权失败", "")
+}

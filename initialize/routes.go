@@ -39,7 +39,14 @@ func RunServer() {
 func routersInit() *gin.Engine {
 
 	r := gin.New()
-
+	/*
+		// 初始化主库
+		masterDB := init_database.Gorm("mysql")
+		//初始化Redis
+		rCache := cache.NewEntryCache()
+		//初始化ClickHouse
+		ckRepo := ck.NewClickHouseRepoEntry()
+	*/
 	r.GET("/", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"success": "true",
@@ -53,6 +60,9 @@ func routersInit() *gin.Engine {
 		middleware.Recovery(false),
 		// 自定义请求日志格式
 		gin.LoggerWithFormatter(middleware.RequestLoggerFormatter),
+		//多数据源处理中间件
+		//middleware.ParseTenant(),
+		//middleware.MilTenant(masterDB, rCache, ckRepo),
 	)
 
 	PrivateGroup := r.Group("system")
