@@ -13,8 +13,9 @@ server:
 
 mysql:
   driverName: mysql
-  host: 121.36.93.234:30080
-  database: ccloud_test
+  #  host: 121.36.93.234:30080  #生产服务器 华为云服务器二
+  host: 101.201.32.216:30080 #线上服务器 node3
+  database: ccloud
   username: root
   password: MySQL%5.7
   maxIdleConns: 10
@@ -22,7 +23,8 @@ mysql:
   config: charset=utf8mb4&parseTime=True&loc=Local
 
 clickhouse:
-  host: 123.56.214.170:9000
+  #host: 124.204.36.139:9000  #生产服务器 weihu_master
+  host: 123.56.214.170:9000 #线上服务器 node2
   database: metric
   username: clickhouse_operator
   password: clickhouse_operator_password

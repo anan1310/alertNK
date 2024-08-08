@@ -85,7 +85,7 @@ func (arw *AlertRuleWork) worker(rule models.AlertRule, ctx context.Context) {
 		select {
 		case <-ticker.C:
 			global.Logger.Sugar().Infof("规则评估 -> %v", rule)
-			arw.Query(arw.ctx, rule) // 使用传入的ctx，而不是arw.ctx
+			arw.Query(arw.ctx, rule)
 
 		case <-ctx.Done():
 			global.Logger.Sugar().Infof("停止 RuleId 为 %v 的 Watch 协程", rule.RuleId)
