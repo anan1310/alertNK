@@ -67,3 +67,13 @@ type Rules struct {
 	Severity         string  ` json:"severity"`        // 告警严重程度
 	Description      string  ` json:"description"`     // 描述 "内存使用率"
 }
+
+// AlertScreen 大屏告警相关
+type AlertScreen struct {
+	//当前告警数
+	RecentCount int `json:"recentRuleCount"`
+	//历史告警数
+	HistoryCount int64 `json:"historyCount"`
+	//告警规则数
+	RuleCount int64 `json:"ruleCount"`
+}

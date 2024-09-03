@@ -4,6 +4,7 @@ import (
 	"alarm_collector/internal/models"
 	"alarm_collector/internal/services"
 	"alarm_collector/middleware"
+	"alarm_collector/pkg/ctx"
 	"alarm_collector/pkg/utils/common"
 	"alarm_collector/pkg/utils/response"
 	"github.com/gin-gonic/gin"
@@ -86,6 +87,52 @@ func (RuleApi) Get(ctx *gin.Context) {
 
 	response.Service(ctx, func() (interface{}, interface{}) {
 		return services.RuleService.Get(r)
+	})
+
+}
+
+func (RuleApi) CountRule(c *gin.Context) {
+	newContext := ctx.DO()
+	tid, _ := c.Get(middleware.TenantIDHeaderKey)
+	tenantId := tid.(string)
+	var (
+		alertCount   int64
+		historyCount int64
+		keys         []string
+	)
+
+	//告警规则条数
+	newContext.DB.DB().Model(&models.AlertRule{}).Where("tenant_id = ? ", tenantId).Count(&alertCount)
+
+	//历史条数
+	newContext.DB.DB().Model(&models.AlertHisEvent{}).Where("tenant_id = ? ", tenantId).Count(&historyCount)
+
+	//当前告警-查询redis
+	cursor := uint64(0)
+	pattern := tenantId + ":" + models.FiringAlertCachePrefix + "*"
+	// 每次获取的键数量
+	count := int64(100)
+
+	for {
+		var curKeys []string
+		var err error
+
+		curKeys, cursor, err = ctx.DO().Redis.Redis().Scan(cursor, pattern, count).Result()
+		if err != nil {
+			break
+		}
+
+		keys = append(keys, curKeys...)
+
+		if cursor == 0 {
+			break
+		}
+	}
+
+	response.Success(c, "success", models.AlertScreen{
+		RuleCount:    alertCount,
+		HistoryCount: historyCount,
+		RecentCount:  len(keys),
 	})
 
 }

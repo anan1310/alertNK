@@ -6,5 +6,5 @@ type PrometheusDataSourceQuery struct {
 	MetricName    string `json:"metricName"`
 	MetricHost    string `json:"metricHost"`
 	TargetMapping string `json:"targetMapping"` //所选指标
-	Pid           string `json:"pid"`
+	TenantId      string `json:"tenantId"`      //租户ID
 }

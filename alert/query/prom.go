@@ -200,10 +200,11 @@ func (rq *RuleQuery) handleAlertSource(rule models.AlertRule) (map[string]interf
 	}
 	//获取数据源的值  如果达到告警的阈值 那么就写入redis缓冲中
 	s := models.PrometheusDataSourceQuery{
-		MetricType:    alertSourceMap["metricType"],
-		MetricName:    alertSourceMap["metricName"],
-		MetricHost:    alertSourceMap["metricHost"],
-		Pid:           alertSourceMap["pid"],
+		MetricType: alertSourceMap["metricType"],
+		MetricName: alertSourceMap["metricName"],
+		MetricHost: alertSourceMap["metricHost"],
+		//Pid:           alertSourceMap["pid"],
+		TenantId:      rule.TenantId,
 		TargetMapping: targetMapping.Str(),
 	}
 	//获取告警源

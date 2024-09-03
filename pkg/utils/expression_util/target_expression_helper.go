@@ -23,7 +23,7 @@ func EvaluateExpression(expressionStr string, parameters map[string]interface{})
 	}
 
 	result, err := expression.Evaluate(parameters)
-	if err != nil {
+	if err != nil || result == "NAN" {
 		global.Logger.Error("解析表达式错误_2：", zap.Error(err))
 		//单位转换失败
 		return 0

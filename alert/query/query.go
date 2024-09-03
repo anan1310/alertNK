@@ -100,13 +100,13 @@ func (rq *RuleQuery) prometheus(rule models.AlertRule) {
 	global.Logger.Sugar().Info("告警源前数据-->", alertSource)
 	conditionStack, severity, err := evaluateRPN(alarmRule, alertSource)
 	global.Logger.Sugar().Info("告警源后数据-->", alertSource)
-	if err != nil || len(alertSource) == 0 {
+	if err != nil {
 		global.Logger.Sugar().Error("告警规则解析错误-->", err)
 		return
 	}
 
 	// 如果最终条件为真，推送告警到redis中
-	if conditionStack {
+	if conditionStack && len(alertSource) > 0 {
 		process.CalIndicatorValue(rq.ctx, curFiringKeys, curPendingKeys, alertSource, rule, severity)
 		global.Logger.Sugar().Info("%s:触发告警,告警规则", rule.RuleName)
 	}
