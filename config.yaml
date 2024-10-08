@@ -13,35 +13,33 @@ server:
 
 mysql:
   driverName: mysql
-  #  host: 121.36.93.234:30080  #生产服务器 华为云服务器二
-  host: 101.201.32.216:30080 #线上服务器 node3
-  database: ccloud
+  host: 127.0.0.1:3306 
+  database: alertNK
   username: root
-  password: MySQL%5.7
+  password: root
   maxIdleConns: 10
   maxOpenConns: 100
   config: charset=utf8mb4&parseTime=True&loc=Local
 
 clickhouse:
-  #host: 124.204.36.139:9000  #生产服务器 weihu_master
-  host: 123.56.214.170:9000 #线上服务器 node2
-  database: metric
-  username: clickhouse_operator
-  password: clickhouse_operator_password
+  host: 127.0.0.1:9000 
+  database: alertNK
+  username: clickhouse
+  password: clickhouse
   maxIdleConns: 10
   maxOpenConns: 100
 
 redis:
-  host: 121.36.93.234
-  port: 6321
-  pass: Weihu2022@
+  host: 127.0.0.1
+  port: 6379
+  pass: 
  # 告警邮箱
 mail:
   host: "smtp.163.com"
-  pass: "SYDWVDNAXUSMQXMP"
+  pass: ""
   port: 465
   to: ""
-  smtpUser: "Anzj1997@163.com"
+  smtpUser: ""
 
 jwt:
   # 失效时间
